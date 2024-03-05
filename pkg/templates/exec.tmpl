@@ -1,0 +1,36 @@
+{{ define "exec" }}
+	{{- if .Argument.HasSlices }}
+		q := {{ .ConstantName }}
+		var queryParams []any
+		{{- if .Argument.Struct }}
+			{{- $argument := .Argument }}
+			{{- range .Argument.Struct.Fields }}
+				{{- if .HasSlice }}
+					if len({{ $argument.VariableForField .}}) > 0 {
+					  for _, v := range {{ $argument.VariableForField .}} {
+						queryParams = append(queryParams, v)
+					  }
+					  q = strings.Replace(q, "/*SLICE:{{ .Column.Name }}*/?", strings.Repeat(",?", len({{ $argument.VariableForField .}}))[1:], 1)
+					} else {
+					  q = strings.Replace(q, "/*SLICE:{{ .Column.Name }}*/?", "NULL", 1)
+					}
+				{{- else }}
+					queryParams = append(queryParams, {{ $argument.VariableForField .}})
+				{{- end }}
+			{{- end }}
+		{{- else }}
+			if len({{ .Argument.Name }}) > 0 {
+				for _, v := range {{ .Argument.Name }} {
+					queryParams = append(queryParams, v)
+				}
+				q = strings.Replace(q, "/*SLICE:{{ .Argument.Column.Name }}*/?", strings.Repeat(",?", len({{ .Argument.Name }}))[1:], 1)
+			} else {
+				q = strings.Replace(q, "/*SLICE:{{ .Argument.Column.Name }}*/?", "NULL", 1)
+			}
+		{{- end }}
+
+		{{ getReturnValue . }} {{ getMethod . }}(q, queryParams...)
+	{{- else }}
+		{{- getReturnValue . }} {{ getMethod . }}({{ .ConstantName }}, {{ .Argument.Params }})
+	{{- end -}}
+{{ end }}

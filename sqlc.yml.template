@@ -1,0 +1,23 @@
+version: '2'
+sql:
+  - name: XXX
+    engine: mysql
+    queries: queries
+    schema: migrations
+    codegen:
+      - plugin: starfield
+        out: src/db
+        options:
+          package: db
+          # preserve_tables:
+          #   - episodata
+          rename:
+            url: URL
+            ip_address: IPAddress
+plugins:
+  - name: starfield
+    process:
+      cmd: /home/sean/proj/starfield/bin/starfield
+    # wasm:
+      # url: file:///home/sean/proj/starfield/bin/starfield.wasm
+      # sha256: xxx

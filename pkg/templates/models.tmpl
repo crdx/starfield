@@ -1,0 +1,15 @@
+{{ define "models" }}
+	{{ range .Structs }}
+		{{ if .Comment }}{{ comment .Comment }}{{ end }}
+		type {{ .Name }} struct {
+			{{- range .Fields }}
+				{{- if .Column.Comment }}{{ comment .Column.Comment }}{{ end }}
+				{{ .Name }} {{ .Type }} {{ if .Tag }}`{{ .Tag }}`{{ end }}
+			{{- end }}
+		}
+
+		{{ if not .IsView }}
+			{{ template "model" . }}
+		{{ end }}
+	{{ end }}
+{{ end }}

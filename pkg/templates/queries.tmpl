@@ -1,0 +1,136 @@
+{{ define "queries" }}
+	{{ range .Queries }}
+		// {{ .Command }}
+		const {{ .ConstantName }} = `
+{{escape .SQL }}
+`
+
+		{{ if .Argument.EmitStruct }}
+			type {{ .Argument.Type }} struct {
+				{{- range .Argument.UniqueFields }}
+					{{ .Name }} {{ .Type }} {{ if .Tag }}`{{ .Tag }}`{{ end }}
+				{{- end }}
+			}
+		{{ end }}
+
+		{{ if .ReturnValue.EmitStruct }}
+			type {{ .ReturnValue.Type }} struct {
+				{{- range .ReturnValue.Struct.Fields }}
+					{{ .Name }} {{ .Type }} {{ if .Tag }}`{{ .Tag }}`{{ end }}
+				{{- end }}
+			}
+		{{ end }}
+
+		{{ if eq .Command ":one" }}
+			{{ template "comments" .Comments -}}
+			{{ if and (eq .ReturnValue.Name "count") (eq .ReturnValue.Typ "int64") }}
+				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
+					{{- template "exec" . }}
+					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
+						var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+					{{- end }}
+					err := row.Scan({{ .ReturnValue.Scan }})
+					if err == sql.ErrNoRows {
+						return 0
+					}
+					if err != nil {
+						handleError(err)
+					}
+					return {{ .ReturnValue.ReturnName }}
+				}
+			{{ else }}
+				func {{ .MethodName }}({{ .Argument.Pair }}) ({{ .ReturnValue.DefineType }}, bool) {
+					{{- template "exec" . }}
+					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
+						var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+					{{- end }}
+					err := row.Scan({{ .ReturnValue.Scan }})
+					if err == sql.ErrNoRows {
+						return item, false
+					}
+					if err != nil {
+						handleError(err)
+					}
+					return {{ .ReturnValue.ReturnName }}, true
+				}
+			{{ end }}
+		{{ end }}
+
+		{{ if eq .Command ":many" }}
+			{{ template "comments" .Comments -}}
+			func {{ .MethodName }}({{ .Argument.Pair }}) ([]{{ .ReturnValue.DefineType }}) {
+				{{- template "exec" . }}
+				if err != nil {
+					handleError(err)
+				}
+				defer rows.Close()
+				items := []{{ .ReturnValue.DefineType }}{}
+				for rows.Next() {
+					var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+					if err := rows.Scan({{ .ReturnValue.Scan }}); err != nil {
+						handleError(err)
+					}
+					items = append(items, {{ .ReturnValue.ReturnName }})
+				}
+				if err := rows.Close(); err != nil {
+					handleError(err)
+				}
+				if err := rows.Err(); err != nil {
+					handleError(err)
+				}
+				return items
+			}
+		{{ end }}
+
+		{{ if eq .Command ":exec" }}
+			{{ template "comments" .Comments -}}
+			func {{ .MethodName }}({{ .Argument.Pair }}) {
+				{{- template "exec" . }}
+				if err != nil {
+					handleError(err)
+				}
+			}
+		{{ end }}
+
+		{{ if eq .Command ":execrows" }}
+			{{ template "comments" .Comments -}}
+			func {{ .MethodName }}({{ .Argument.Pair }}) (int) {
+				{{- template "exec" . }}
+				if err != nil {
+					handleError(err)
+				}
+				if rowsAffected, err := result.RowsAffected(); err != nil {
+					handleError(err)
+				} else {
+					return rowsAffected
+				}
+			}
+		{{ end }}
+
+		{{ if eq .Command ":execlastid" }}
+			{{ template "comments" .Comments -}}
+			func {{ .MethodName }}({{ .Argument.Pair }}) (int) {
+				{{- template "exec" . }}
+				if err != nil {
+					handleError(err)
+				}
+				if lastInsertID, err := result.LastInsertId(); err != nil {
+					handleError(err)
+				} else {
+					return lastInsertID
+				}
+			}
+		{{ end }}
+
+		{{ if eq .Command ":execresult" }}
+			{{ template "comments" .Comments -}}
+			func {{ .MethodName }}({{ .Argument.Pair }}) (sql.Result) {
+				{{- template "exec" . }}
+				if err != nil {
+					handleError(err)
+				}
+				return result
+			}
+		{{ end }}
+	{{ end }}
+{{ end }}

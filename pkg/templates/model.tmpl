@@ -1,0 +1,328 @@
+{{ define "model" }}
+	{{ $name := .Name }}
+	{{ $table := .Table }}
+	{{ $fieldNames := .FieldNames }}
+	{{ $hasDeletedAt := .HasDeletedAt }}
+	{{ $fields := .Fields }}
+
+	// Create{{ $name }} creates a new instance of {{ $name }}.
+	func Create{{ $name }}(value *{{ $name }}) *{{ $name }} {
+		{{- if .HasCreatedAt }}
+			value.CreatedAt = time.Now().UTC()
+		{{ end -}}
+		result, err := Exec(`
+		insert into {{ $table.Name }} (
+			{{ .FieldNames }}
+		) values (
+			{{ .Placeholders }}
+		)`,
+			{{- range .Fields }}
+				value.{{ .Name }},
+			{{- end }}
+		)
+		if err != nil {
+			handleError(err)
+		}
+		lastInsertID, err := result.LastInsertId()
+		if err != nil {
+			handleError(err)
+		}
+		value.ID = lastInsertID
+		return value
+	}
+
+	// Find{{ $name }} finds an instance of {{ $name }} by ID.
+	func Find{{ $name }}(id int64) ({{ $name }}, bool) {
+		row := QueryRow(`
+		select {{ .FieldNames }}
+		from {{ $table.Name }}
+		where id = ?{{ if .HasDeletedAt }} and deleted_at is null{{ end }}
+	`, id)
+		var item {{ $name }}
+		err := row.Scan(
+			{{- range .Fields }}
+				&item.{{ .Name }},
+			{{- end }}
+		)
+		if err == sql.ErrNoRows {
+			return item, false
+		}
+		if err != nil {
+			handleError(err)
+		}
+		return item, true
+	}
+
+	// FindAll{{ $name }}s finds all non-deleted instances of {{ $name }}, sorted by ID ASC.
+	func FindAll{{ $name }}s() []{{ $name }} {
+		rows, err := Query(`
+		select {{ .FieldNames }}
+		from {{ $table.Name }}{{ if .HasDeletedAt }} where deleted_at is null{{ end }}
+		order by id asc
+	`)
+		if err != nil {
+			handleError(err)
+		}
+		defer rows.Close()
+		items := []{{ $name }}{}
+		for rows.Next() {
+			var item {{ $name }}
+			if err := rows.Scan(
+				{{- range .Fields }}
+					&item.{{ .Name }},
+				{{- end }}
+			); err != nil {
+				handleError(err)
+			}
+			items = append(items, item)
+		}
+		if err := rows.Close(); err != nil {
+			handleError(err)
+		}
+		if err := rows.Err(); err != nil {
+			handleError(err)
+		}
+		return items
+	}
+
+	{{ if $hasDeletedAt }}
+		// FindAll{{ $name }}sUnscoped finds all instances (including deleted) of {{ $name }}, sorted by ID ASC.
+		func FindAll{{ $name }}sUnscoped() []{{ $name }} {
+			rows, err := Query(`
+		select {{ .FieldNames }}
+		from {{ $table.Name }}
+		order by id asc
+	`)
+			if err != nil {
+				handleError(err)
+			}
+			defer rows.Close()
+			items := []{{ $name }}{}
+			for rows.Next() {
+				var item {{ $name }}
+				if err := rows.Scan(
+					{{- range .Fields }}
+						&item.{{ .Name }},
+					{{- end }}
+				); err != nil {
+					handleError(err)
+				}
+				items = append(items, item)
+			}
+			if err := rows.Close(); err != nil {
+				handleError(err)
+			}
+			if err := rows.Err(); err != nil {
+				handleError(err)
+			}
+			return items
+		}
+
+		// Delete soft deletes this instance of {{ $name }}.
+		func (self *{{ $name }}) Delete() bool {
+			result, err := Exec(`update {{ $table.Name }} set deleted_at = ? where id = ?`, time.Now().UTC(), self.ID)
+			if err != nil {
+				handleError(err)
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				handleError(err)
+			}
+			return rowsAffected > 0
+		}
+
+		// Restore restores this instance of {{ $name }}.
+		func (self *{{ $name }}) Restore() bool {
+			result, err := Exec(`update {{ $table.Name }} set deleted_at = null where id = ?`, self.ID)
+			if err != nil {
+				handleError(err)
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				handleError(err)
+			}
+			return rowsAffected > 0
+		}
+
+		// HardDelete hard deletes (i.e. DELETE) this instance of {{ $name }}.
+		func (self *{{ $name }}) HardDelete() bool {
+			result, err := Exec(`delete from {{ $table.Name }} where id = ?`, self.ID)
+			if err != nil {
+				handleError(err)
+			}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				handleError(err)
+			}
+			return rowsAffected > 0
+		}
+	{{ end }}
+
+	{{ range .Fields }}
+		{{ if and (ne .Name "ID") (ne .Name "DeletedAt") (ne .Name "CreatedAt") }}
+			// FindAll{{ $name }}sBy{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}, sorted by ID ASC.
+			func FindAll{{ $name }}sBy{{ .Name }}(value {{ .Type }}) []{{ $name }} {
+				var rows *sql.Rows
+				var err error
+				{{- if .Nullable }}
+					if value.Valid {
+						rows, err = Query(`
+			select {{ $fieldNames }}
+			from {{ $table.Name }}
+			where {{ .Tags.column }} = ?{{ if $hasDeletedAt }} and deleted_at is null{{ end }}
+			order by id asc
+		`, value)
+					} else {
+						rows, err = Query(`
+			select {{ $fieldNames }}
+			from {{ $table.Name }}
+			where {{ .Tags.column }} is null{{ if $hasDeletedAt }} and deleted_at is null{{ end }}
+			order by id asc
+		`)
+					}
+				{{ else }}
+					rows, err = Query(`
+		select {{ $fieldNames }}
+		from {{ $table.Name }}
+		where {{ .Tags.column }} = ?{{ if $hasDeletedAt }} AND deleted_at IS NULL{{ end }}
+		order by id asc
+	`, value)
+				{{ end -}}
+				if err != nil {
+					handleError(err)
+				}
+				defer rows.Close()
+				items := []{{ $name }}{}
+				for rows.Next() {
+					var item {{ $name }}
+					if err := rows.Scan(
+						{{- range $fields }}
+							&item.{{ .Name }},
+						{{- end }}
+					); err != nil {
+						handleError(err)
+					}
+					items = append(items, item)
+				}
+				if err := rows.Close(); err != nil {
+					handleError(err)
+				}
+				if err := rows.Err(); err != nil {
+					handleError(err)
+				}
+				return items
+			}
+
+			{{ if $hasDeletedAt }}
+				// FindAll{{ $name }}sBy{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}, sorted by ID ASC.
+				func FindAll{{ $name }}sBy{{ .Name }}Unscoped(value {{ .Type }}) []{{ $name }} {
+					var rows *sql.Rows
+					var err error
+					{{- if .Nullable }}
+						if value.Valid {
+							rows, err = Query(`
+			select {{ $fieldNames }}
+			from {{ $table.Name }}
+			where {{ .Tags.column }} = ?
+			order by id asc
+		`, value)
+						} else {
+							rows, err = Query(`
+			select {{ $fieldNames }}
+			from {{ $table.Name }}
+			where {{ .Tags.column }} IS NULL
+			order by id asc
+		`)
+						}
+					{{ else }}
+						rows, err = Query(`
+			select {{ $fieldNames }}
+			from {{ $table.Name }}
+			where {{ .Tags.column }} = ?
+			order by id asc
+		`, value)
+					{{ end -}}
+					if err != nil {
+						handleError(err)
+					}
+					defer rows.Close()
+					items := []{{ $name }}{}
+					for rows.Next() {
+						var item {{ $name }}
+						if err := rows.Scan(
+							{{- range $fields }}
+								&item.{{ .Name }},
+							{{- end }}
+						); err != nil {
+							handleError(err)
+						}
+						items = append(items, item)
+					}
+					if err := rows.Close(); err != nil {
+						handleError(err)
+					}
+					if err := rows.Err(); err != nil {
+						handleError(err)
+					}
+					return items
+				}
+			{{ end }}
+
+			// Find{{ $name }}By{{ .Name }} finds an instance of {{ $name }} by {{ .Name }}.
+			func Find{{ $name }}By{{ .Name }}(value {{ .BaseType }}) ({{ $name }}, bool) {
+				row := QueryRow(`
+		select {{ $fieldNames }}
+		from {{ $table.Name }}
+		where {{ .Tags.column }} = ?{{ if $hasDeletedAt }} AND deleted_at IS NULL{{ end }}
+	`, value)
+				var item {{ $name }}
+				err := row.Scan(
+					{{- range $fields }}
+						&item.{{ .Name }},
+					{{- end }}
+				)
+				if err == sql.ErrNoRows {
+					return item, false
+				}
+				if err != nil {
+					handleError(err)
+				}
+				return item, true
+			}
+
+			// Update{{ .Name }} updates the {{ .Name }} field.
+			func (self *{{ $name }}) Update{{ .Name }}(value {{ .BaseType }}) bool {
+				result, err := Exec("update {{ $table.Name }} set {{ .Tags.column }} = ? where id = ?", value, self.ID)
+				if err != nil {
+					handleError(err)
+				}
+				rowsAffected, err := result.RowsAffected()
+				if err != nil {
+					handleError(err)
+				}
+				{{ if .Nullable }}
+					self.{{ .Name }} = sql.Null[{{ .BaseType }}]{V: value, Valid: true}
+				{{ else }}
+					self.{{ .Name }} = value
+				{{ end -}}
+				return rowsAffected > 0
+			}
+
+			{{ if .Nullable }}
+				// Clear{{ .Name }} sets the {{ .Name }} field to NULL.
+				func (self *{{ $name }}) Clear{{ .Name }}() bool {
+					result, err := Exec("update {{ $table.Name }} set {{ .Tags.column }} = null where id = ?", self.ID)
+					if err != nil {
+						handleError(err)
+					}
+					rowsAffected, err := result.RowsAffected()
+					if err != nil {
+						handleError(err)
+					}
+					self.{{ .Name }} = sql.Null[{{ .BaseType }}]{}
+					return rowsAffected > 0
+				}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+{{ end }}

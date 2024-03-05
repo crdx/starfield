@@ -1,0 +1,443 @@
+{{ define "db" }}
+	type Connection interface {
+		Exec(string, ...any) (sql.Result, error)
+		Query(string, ...any) (*sql.Rows, error)
+		QueryRow(string, ...any) *sql.Row
+	}
+
+	var (
+		connection         Connection
+		previousConnection Connection
+		config             *Config
+	)
+
+	type Migration struct {
+		Name string
+		SQL  string
+	}
+
+	type Config struct {
+		Name         string         // Database name.
+		User         string         // Database username.
+		Pass         string         // Database password.
+		Host         string         // Database hostname.
+		Socket       string         // Database socket path.
+		Location     *time.Location // Database locale for time.Time values.
+		Charset      string         // Database character set.
+		Migrations   []Migration    // Migrations to run.
+		Fresh        bool           // Whether to drop and recreate the database (e.g. for tests).
+		EnableLogger bool           // Whether to log queries and their execution time.
+		ErrorHandler func(error)    // Alternative error handler to panic().
+		Seed         func()         // Database seeder (only runs if the database is fresh).
+	}
+
+	// Initialise the database.
+	func Init(c *Config) error {
+		config = c
+		base := config.baseMySQLConfig()
+
+		var shouldSeed bool
+		if config.Fresh {
+			if dropped, err := dropDatabase(base.FormatDSN(), config.Name); err != nil {
+				return err
+			} else if dropped {
+				shouldSeed = true
+			}
+		}
+
+		if created, err := createDatabase(base.FormatDSN(), config.Name); err != nil {
+			return err
+		} else if created {
+			shouldSeed = true
+		}
+
+		primary := config.primaryMySQLConfig()
+
+		migrator := primary.Clone()
+		migrator.MultiStatements = true
+
+		if err := migrate(migrator.FormatDSN()); err != nil {
+			return err
+		}
+
+		var err error
+		connection, err = sql.Open("mysql", primary.FormatDSN())
+
+		if shouldSeed {
+			config.Seed()
+		}
+
+		return err
+	}
+
+	// Query is the escape hatch that lets you call the underlying Query method.
+	func Query(query string, args ...any) (*sql.Rows, error) {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+			}()
+		}
+		return connection.Query(query, args...)
+	}
+
+	// Exec is the escape hatch that lets you call the underlying Exec method.
+	func Exec(query string, args ...any) (sql.Result, error) {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+			}()
+		}
+		return connection.Exec(query, args...)
+	}
+
+	// QueryRow is the escape hatch that lets you call the underlying QueryRow method.
+	func QueryRow(query string, args ...any) *sql.Row {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+			}()
+		}
+		return connection.QueryRow(query, args...)
+	}
+
+	func formatQuery(query string, args ...any) string {
+		for _, arg := range args {
+			var s string
+			switch a := arg.(type) {
+			case bool:
+				if a {
+					s = "1"
+				} else {
+					s = "0"
+				}
+			case int64, float64:
+				s = fmt.Sprintf("%v", a)
+			case sql.Null[time.Time]:
+				if a.Valid {
+					s = fmt.Sprintf("%q", a.V.Format(time.DateTime))
+				} else {
+					s = "NULL"
+				}
+			case time.Time:
+				s = fmt.Sprintf("%q", a.Format(time.DateTime))
+			default:
+				s = fmt.Sprintf("%q", a)
+			}
+			query = strings.Replace(query, "?", s, 1)
+		}
+		query = strings.TrimSpace(query)
+		query = strings.ReplaceAll(query, "\n", " ")
+		query = regexp.MustCompile(`\s+`).ReplaceAllString(query, " ")
+		return query
+	}
+
+	func (self *Config) baseMySQLConfig() *mysql.Config {
+		base := mysql.Config{
+			User:                 self.User,
+			Passwd:               self.Pass,
+			ParseTime:            true,
+			AllowNativePasswords: true,
+			Loc:                  self.Location,
+			Params: map[string]string{
+				"charset": self.Charset,
+			},
+		}
+
+		if self.Socket != "" {
+			base.Net = "unix"
+			base.Addr = self.Socket
+		} else {
+			base.Net = "tcp"
+			base.Addr = self.Host
+		}
+
+		return &base
+	}
+
+	// DSN returns the database connection string.
+	func (self *Config) DSN() string {
+		return self.primaryMySQLConfig().FormatDSN()
+	}
+
+	func (self *Config) primaryMySQLConfig() *mysql.Config {
+		base := self.baseMySQLConfig().Clone()
+		base.DBName = self.Name
+		return base
+	}
+
+	func migrate(dsn string) error {
+		connection, err := sql.Open("mysql", dsn)
+		if err != nil {
+			return err
+		}
+		defer connection.Close()
+
+		_, err = connection.Exec(`
+	        CREATE TABLE IF NOT EXISTS migrations (
+	            id varchar(255) NOT NULL,
+	            ts datetime DEFAULT NULL,
+	            PRIMARY KEY (id)
+	        )
+	    `)
+		if err != nil {
+			return err
+		}
+
+		rows, err := connection.Query("SELECT id FROM migrations")
+		if err != nil {
+			return err
+		}
+
+		ran := map[string]bool{}
+		for rows.Next() {
+			var id string
+			rows.Scan(&id)
+			ran[id] = true
+		}
+
+		for _, migration := range config.Migrations {
+			if ran[migration.Name] {
+				continue
+			}
+
+			if config.EnableLogger {
+				log.Printf("\033[33mMigrating: %s\033[0m", migration.Name)
+			}
+
+			_, err = connection.Exec(migration.SQL)
+			if err != nil {
+				return err
+			}
+
+			_, err = connection.Exec(
+				"INSERT INTO migrations (id, ts) VALUES (?, ?)",
+				migration.Name,
+				time.Now().UTC(),
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	func createDatabase(dsn string, name string) (bool, error) {
+		connection, err := sql.Open("mysql", dsn)
+		if err != nil {
+			return false, err
+		}
+		defer connection.Close()
+
+		result, err := connection.Exec("CREATE DATABASE IF NOT EXISTS " + name)
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+
+		return rowsAffected > 0, nil
+	}
+
+	func dropDatabase(dsn string, name string) (bool, error) {
+		connection, err := sql.Open("mysql", dsn)
+		if err != nil {
+			return false, err
+		}
+		defer connection.Close()
+
+		result, err := connection.Exec("DROP DATABASE IF EXISTS " + name)
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+
+		return rowsAffected > 0, nil
+	}
+
+	func listFileNames(dir string) []string {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return nil
+		}
+
+		var names []string
+		for _, entry := range entries {
+			names = append(names, entry.Name())
+		}
+		return names
+	}
+
+	func handleError(err error) {
+		if config.ErrorHandler != nil {
+			config.ErrorHandler(err)
+		} else {
+			panic(err)
+		}
+	}
+
+	// BeginTransaction starts a new transaction. If one has already been started, this function
+	// returns an error. All subsequent database calls will take place within this transaction,
+	// so this is NOT thread-safe.
+	func BeginTransaction() error {
+		if previousConnection == nil {
+			previousConnection = connection
+			var err error
+			connection, err = connection.(*sql.DB).Begin()
+			if err != nil {
+				return err
+			}
+		}
+		return errors.New("transaction already started")
+	}
+
+	// CommitTransaction commits the current transaction, if any.
+	func CommitTransaction() error {
+		if previousConnection == nil {
+			return errors.New("no transaction")
+		}
+		err := connection.(*sql.Tx).Commit()
+		connection = previousConnection
+		previousConnection = nil
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// RollbackTransaction rolls back the current transaction, if any.
+	func RollbackTransaction() error {
+		if previousConnection == nil {
+			return errors.New("no transaction")
+		}
+		err := connection.(*sql.Tx).Rollback()
+		connection = previousConnection
+		previousConnection = nil
+		return err
+	}
+
+	// NSlice converts a []T into a []sql.Null[T], effectively wrapping each slice element in
+	// sql.Null[T].
+	func NSlice[T any](v []T) []sql.Null[T] {
+		var items []sql.Null[T]
+		for _, item := range v {
+			items = append(items, N(item))
+		}
+		return items
+	}
+
+	// N converts a T into a sql.Null[T].
+	func N[T any](v T) sql.Null[T] {
+		return sql.Null[T]{V: v, Valid: true}
+	}
+
+	// NTime parses a string into a valid sql.Null[time.Time]. If it cannot be parsed, it returns a null
+	// instance of sql.Null[time.Time].
+	func NTime(s string, layout string) sql.Null[time.Time] {
+		var v sql.Null[time.Time]
+		t, err := time.Parse(layout, s)
+		if err != nil {
+			return v
+		}
+		if s != "" {
+			v.V = t
+			v.Valid = true
+		}
+		return v
+	}
+
+	// Now returns the current time.Time in UTC.
+	func Now() time.Time {
+		return time.Now().UTC()
+	}
+
+	// ToTime returns the time.Time that corresponds to the passed value. The value must be either
+	// time.Time or sql.Null[time.Time].
+	func ToTime(v any) (time.Time, bool) {
+		switch t := v.(type) {
+		case sql.Null[time.Time]:
+			if t.Valid {
+				return t.V, true
+			}
+		case time.Time:
+			return t, true
+		}
+		return time.Time{}, false
+	}
+
+	func Pluck[T any, U any](items []U, field string) []T {
+		var values []T
+		for _, item := range items {
+			values = append(values, reflect.ValueOf(item).FieldByName(field).Interface().(T))
+		}
+		return values
+	}
+
+	// MapByID maps a slice of T to a map[int64]T using the ID field as the key. If T is not a struct,
+	// or the ID field does not exist in T, this function will panic.
+	func MapByID[T any](items []T) map[int64]T {
+		return MapBy[int64]("ID", items)
+	}
+
+	// MapBy maps a slice of T to a map[A]T using keyField as the key. If T is not a struct, or
+	// keyField does not exist in T, this function will panic.
+	func MapBy[A comparable, T any](keyField string, items []T) map[A]T {
+		return sliceToMap(items, func(item T) (A, T) {
+			return reflect.ValueOf(item).FieldByName(keyField).Interface().(A), item
+		})
+	}
+
+	// MapBy2 maps a slice of T to a map[A]B using keyField and valueField as the key and value. If T
+	// is not a struct, or keyField or valueField do not exist in T, this function will panic.
+	func MapBy2[A comparable, B any, T any](keyField, valueField string, items []T) map[A]B {
+		return sliceToMap(items, func(item T) (A, B) {
+			v := reflect.ValueOf(item)
+			keyFieldValue := v.FieldByName(keyField)
+			valueFieldValue := v.FieldByName(valueField)
+			return convertValue[A](keyFieldValue),
+				convertValue[B](valueFieldValue)
+		})
+	}
+
+	// convertValue converts a reflect.Value into T taking into account nil.
+	func convertValue[T any](v reflect.Value) T {
+		if canBeNil(v) && v.IsNil() {
+			return zeroValue[T]()
+		} else {
+			return v.Interface().(T)
+		}
+	}
+
+	// canBeNil checks if the reflect.Value can be nil based on its kind.
+	func canBeNil(v reflect.Value) bool {
+		switch v.Kind() {
+		case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Chan, reflect.Interface, reflect.Func:
+			return true
+		default:
+			return false
+		}
+	}
+
+	// zeroValue returns a pointer to a new zero value of type T.
+	func zeroValue[T any]() T {
+		var zero T
+		return zero
+	}
+
+	// SliceToMap returns a map containing key-value pairs provided by transform function applied to
+	// elements of the given slice. If any of two pairs would have the same key the last one gets added
+	// to the map. The order of keys in returned map is not specified and is not guaranteed to be the
+	// same from the original array.
+	func sliceToMap[T any, K comparable, V any](collection []T, transform func(item T) (K, V)) map[K]V {
+		result := make(map[K]V, len(collection))
+
+		for _, t := range collection {
+			k, v := transform(t)
+			result[k] = v
+		}
+
+		return result
+	}
+{{ end }}
