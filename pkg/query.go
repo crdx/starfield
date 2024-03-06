@@ -1,10 +1,12 @@
 package starfield
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/sqlc-dev/plugin-sdk-go/metadata"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
+	"github.com/sqlc-dev/plugin-sdk-go/sdk"
 )
 
 type Query struct {
@@ -174,4 +176,146 @@ func (self QueryValue) VariableForField(f Field) string {
 		return toLowerCase(f.Name)
 	}
 	return self.Name + "." + f.Name
+}
+
+func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct) ([]Query, error) {
+	queries := make([]Query, 0, len(req.Queries))
+
+	for _, sourceQuery := range req.Queries {
+		if sourceQuery.Name == "" {
+			continue
+		}
+		if sourceQuery.Cmd == "" {
+			continue
+		}
+
+		query := Query{
+			Command:      sourceQuery.Cmd,
+			ConstantName: sdk.LowerTitle(sourceQuery.Name),
+			MethodName:   sourceQuery.Name,
+			SourceName:   strings.TrimSuffix(sourceQuery.Filename, ".sql"),
+			SQL:          sourceQuery.Text,
+			Comments:     sourceQuery.Comments,
+		}
+
+		queryParameterLimit := options.MaxParams.MustGet()
+
+		if len(sourceQuery.Params) == 1 && queryParameterLimit != 0 {
+			p := sourceQuery.Params[0]
+			query.Argument = QueryValue{
+				Name:   escape(getParamName(p)),
+				Typ:    getGoType(p.Column),
+				Column: p.Column,
+			}
+		} else if len(sourceQuery.Params) >= 1 {
+			var cols []Column
+			for _, p := range sourceQuery.Params {
+				cols = append(cols, Column{
+					id:     int(p.Number),
+					Column: p.Column,
+				})
+			}
+			s, err := columnsToStruct(options, query.MethodName+"Params", cols, false)
+			if err != nil {
+				return nil, err
+			}
+			query.Argument = QueryValue{
+				Emit:   true,
+				Name:   "arg",
+				Struct: s,
+			}
+			if len(sourceQuery.Params) <= queryParameterLimit {
+				query.Argument.Emit = false
+			}
+		}
+
+		if len(sourceQuery.Columns) == 1 {
+			column := sourceQuery.Columns[0]
+			name := getColumnName(column, 0)
+			name = strings.Replace(name, "$", "_", -1)
+			query.ReturnValue = QueryValue{
+				Name: escape(name),
+				Typ:  getGoType(column),
+			}
+		} else if returnsData(sourceQuery) {
+			var gs *Struct
+			var emit bool
+
+			for _, s := range structs {
+				if len(s.Fields) != len(sourceQuery.Columns) {
+					continue
+				}
+				same := true
+				for i, f := range s.Fields {
+					column := sourceQuery.Columns[i]
+					sameName := f.Name == getStructName(getColumnName(column, i), options)
+					sameType := f.Type == getGoType(column)
+					sameTable := sdk.SameTableName(column.Table, s.Table, req.Catalog.DefaultSchema)
+					if !sameName || !sameType || !sameTable {
+						same = false
+					}
+				}
+				if same {
+					gs = &s
+					break
+				}
+			}
+
+			if gs == nil {
+				var columns []Column
+				for i, c := range sourceQuery.Columns {
+					columns = append(columns, Column{
+						id:     i,
+						Column: c,
+					})
+				}
+				var err error
+				gs, err = columnsToStruct(options, query.MethodName+"Row", columns, true)
+				if err != nil {
+					return nil, err
+				}
+				emit = true
+			}
+			query.ReturnValue = QueryValue{
+				Emit:   emit,
+				Name:   "item",
+				Struct: gs,
+			}
+		}
+
+		queries = append(queries, query)
+	}
+	sort.Slice(queries, func(i, j int) bool { return queries[i].MethodName < queries[j].MethodName })
+	return queries, nil
+}
+
+func getMethod(query Query) string {
+	switch query.Command {
+	case ":one":
+		return "QueryRow"
+	case ":many":
+		return "Query"
+	default:
+		return "Exec"
+	}
+}
+
+func getReturnValue(query Query) string {
+	switch query.Command {
+	case ":one":
+		return "row :="
+	case ":many":
+		return "rows, err :="
+	case ":exec":
+		return "_, err :="
+	case ":execrows", ":execlastid":
+		return "result, err :="
+	case ":execresult":
+		return "result, err :="
+	}
+	return ""
+}
+
+func returnsData(query *plugin.Query) bool {
+	return query.Cmd == metadata.CmdMany || query.Cmd == metadata.CmdOne
 }

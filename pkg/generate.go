@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"embed"
 	"fmt"
 	"go/format"
 	"text/template"
@@ -12,6 +13,18 @@ import (
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
 	"github.com/sqlc-dev/plugin-sdk-go/sdk"
 )
+
+//go:embed templates/*
+var templates embed.FS
+
+type TemplateArgs struct {
+	Package    string
+	Structs    []Struct
+	Queries    []Query
+	Version    string
+	SourceName string
+	Imports    []string
+}
 
 type File struct {
 	Name     string
@@ -24,8 +37,8 @@ func Generate(ctx context.Context, req *plugin.GenerateRequest) (*plugin.Generat
 		return nil, err
 	}
 
-	structs := buildStructs(req, options)
-	queries, err := buildQueries(req, options, structs)
+	structs := makeStructs(req, options)
+	queries, err := makeQueries(req, options, structs)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +89,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 	imports = lo.Uniq(imports)
 	queries = fixNamingConflicts(imports, queries)
 
-	args := templateArgs{
+	args := TemplateArgs{
 		Package: options.Package,
 		Structs: structs,
 		Imports: imports,

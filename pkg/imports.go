@@ -1,7 +1,9 @@
 package starfield
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/sqlc-dev/plugin-sdk-go/metadata"
 )
@@ -164,4 +166,21 @@ func mergeImports(imports ...FileImports) [][]string {
 		}
 	}
 	return [][]string{stds, pkgs}
+}
+
+func fixNamingConflicts(imports []string, queries []Query) []Query {
+	m := make(map[string]struct{})
+	for _, path := range imports {
+		paths := strings.Split(path, "/")
+		m[paths[len(paths)-1]] = struct{}{}
+	}
+
+	replacedQueries := make([]Query, 0, len(queries))
+	for _, query := range queries {
+		if _, exist := m[query.Argument.Name]; exist {
+			query.Argument.Name = toCamelCase(fmt.Sprintf("arg_%s", query.Argument.Name))
+		}
+		replacedQueries = append(replacedQueries, query)
+	}
+	return replacedQueries
 }
