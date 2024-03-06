@@ -45,6 +45,7 @@ func (self *Importer) mainImports() FileImports {
 	std["os"] = true
 	std["reflect"] = true
 	std["regexp"] = true
+	std["strings"] = true
 	std["time"] = true
 
 	pkg["github.com/go-sql-driver/mysql"] = true

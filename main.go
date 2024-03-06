@@ -29,12 +29,16 @@ var sqlcTemplate string
 //go:embed migration.sql.template
 var migrationTemplate []byte
 
+//go:embed query.sql.template
+var queryTemplate []byte
+
 func doInit() {
 	log.SetFlags(0)
-	migrationsDir := "src/migrations"
-	queriesDir := "queries"
 	sqlc := "sqlc.yml"
+	migrationsDir := "src/migrations"
 	schema := "0000000000_schema.sql"
+	queriesDir := "queries"
+	query := "foos.sql"
 
 	if pathExists(sqlc) {
 		log.Printf(col.Yellow("skip %s"), sqlc)

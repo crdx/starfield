@@ -1,0 +1,2 @@
+-- name: FetchTheFoos :many
+select * from foo where deleted_at is null;
