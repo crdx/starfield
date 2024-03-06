@@ -125,6 +125,18 @@
 				} else {
 					s = "NULL"
 				}
+			case sql.Null[int64]:
+				if a.Valid {
+					s = fmt.Sprintf("%v", a.V)
+				} else {
+					s = "NULL"
+				}
+			case sql.Null[float64]:
+				if a.Valid {
+					s = fmt.Sprintf("%v", a.V)
+				} else {
+					s = "NULL"
+				}
 			case time.Time:
 				s = fmt.Sprintf("%q", a.Format(time.DateTime))
 			default:
