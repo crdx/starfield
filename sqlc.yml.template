@@ -1,23 +1,20 @@
 version: '2'
 sql:
-  - name: XXX
+  - name: {{ .Name }}
     engine: mysql
     queries: queries
-    schema: migrations
+    schema: src/migrations
     codegen:
       - plugin: starfield
         out: src/db
         options:
           package: db
           # preserve_tables:
-          #   - episodata
-          rename:
-            url: URL
-            ip_address: IPAddress
+          #   - foo_data # not "datum"
+          # rename:
+          #   url: URL
+          #   ip_address: IPAddress
 plugins:
   - name: starfield
     process:
-      cmd: /home/sean/proj/starfield/bin/starfield
-    # wasm:
-      # url: file:///home/sean/proj/starfield/bin/starfield.wasm
-      # sha256: xxx
+      cmd: starfield

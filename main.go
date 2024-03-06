@@ -2,39 +2,65 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"log"
 	"os"
+	"path"
+	"text/template"
 
 	starfield "crdx.org/starfield/pkg"
 	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/codegen"
 )
 
+func main() {
+	if len(os.Args) == 2 && os.Args[1] == "init" {
+		doInit()
+		os.Exit(0)
+	}
+
+	codegen.Run(starfield.Generate)
+}
+
 //go:embed sqlc.yml.template
-var sqlc []byte
+var sqlcTemplate string
 
 //go:embed migration.sql.template
-var migration []byte
+var migrationTemplate []byte
 
-func main() {
+func doInit() {
 	log.SetFlags(0)
+	migrationsDir := "src/migrations"
+	queriesDir := "queries"
+	sqlc := "sqlc.yml"
+	schema := "0000000000_schema.sql"
 
-	if len(os.Args) == 2 && os.Args[1] == "init" {
-		if PathExists("sqlc.yml") {
-			log.Printf("Not creating sqlc.yml as it already exists")
-		} else {
-			log.Printf("Writing sqlc.yml")
-			lo.Must0(os.WriteFile("sqlc.yml", sqlc, os.ModePerm))
-		}
-
-		log.Printf("Creating migrations dir")
-		if err := MakeOutputDir("migrations"); err != nil {
-			log.Printf("Unable to create dir: %s", err)
-			return
-		}
-		log.Printf("Writing migrations/0000000000_init.sql")
-		lo.Must0(os.WriteFile("migrations/0000000000_init.sql", migration, os.ModePerm))
+	if pathExists(sqlc) {
+		log.Printf("\033[33mskip %s\033[0m", sqlc)
 	} else {
-		codegen.Run(starfield.Generate)
+		log.Printf("\033[32mwrite %s\033[0m", sqlc)
+		file := lo.Must(os.OpenFile(sqlc, os.O_CREATE|os.O_WRONLY, 0o644))
+		lo.Must0(template.Must(template.New(sqlc).Parse(sqlcTemplate)).Execute(
+			file,
+			map[string]string{"Name": path.Base(lo.Must(os.Getwd()))},
+		))
 	}
+
+	if err := os.MkdirAll(migrationsDir, 0o755); err != nil {
+		log.Printf("\033[31mmkdir %s: %s\033[0m", migrationsDir, err)
+	} else {
+		log.Printf("\033[32mwrite %s/%s\033[0m", migrationsDir, schema)
+		lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", migrationsDir, schema), migrationTemplate, 0o644))
+	}
+
+	if err := os.MkdirAll(queriesDir, 0o755); err != nil {
+		log.Printf("\033[31mmkdir %s: %s\033[0m", queriesDir, err)
+	} else {
+		log.Printf("\033[32mmkdir %s\033[0m", queriesDir)
+	}
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }
