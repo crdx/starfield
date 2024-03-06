@@ -236,6 +236,9 @@
 		defer connection.Close()
 
 		result, err := connection.Exec("CREATE DATABASE IF NOT EXISTS " + name)
+		if err != nil {
+			return false, err
+		}
 		rowsAffected, err := result.RowsAffected()
 		if err != nil {
 			return false, err
@@ -252,6 +255,9 @@
 		defer connection.Close()
 
 		result, err := connection.Exec("DROP DATABASE IF EXISTS " + name)
+		if err != nil {
+			return false, err
+		}
 		rowsAffected, err := result.RowsAffected()
 		if err != nil {
 			return false, err
