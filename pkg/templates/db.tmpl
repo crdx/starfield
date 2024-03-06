@@ -75,7 +75,7 @@
 		if config.EnableLogger {
 			t := time.Now()
 			defer func() {
-				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+				logQuery(formatQuery(query, args...), time.Since(t))
 			}()
 		}
 		return connection.Query(query, args...)
@@ -86,7 +86,7 @@
 		if config.EnableLogger {
 			t := time.Now()
 			defer func() {
-				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+				logQuery(formatQuery(query, args...), time.Since(t))
 			}()
 		}
 		return connection.Exec(query, args...)
@@ -97,10 +97,14 @@
 		if config.EnableLogger {
 			t := time.Now()
 			defer func() {
-				log.Printf("[\033[33m%s\033[0m] %s", time.Since(t).Truncate(time.Millisecond), formatQuery(query, args...))
+				logQuery(formatQuery(query, args...), time.Since(t))
 			}()
 		}
 		return connection.QueryRow(query, args...)
+	}
+
+	func logQuery(s string, d time.Duration) {
+		log.Printf("[\033[33m%3dms\033[0m] %s", d.Truncate(time.Millisecond).Milliseconds(), s)
 	}
 
 	func formatQuery(query string, args ...any) string {
@@ -128,8 +132,7 @@
 			}
 			query = strings.Replace(query, "?", s, 1)
 		}
-		query = strings.TrimSpace(query)
-		query = strings.ReplaceAll(query, "\n", " ")
+		query = strings.ReplaceAll(strings.TrimSpace(query), "\n", " ")
 		query = regexp.MustCompile(`\s+`).ReplaceAllString(query, " ")
 		return query
 	}
