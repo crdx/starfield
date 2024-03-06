@@ -19,7 +19,7 @@ var migration []byte
 func main() {
 	log.SetFlags(0)
 
-	if len(os.Args[0]) == 2 && os.Args[1] == "init" {
+	if len(os.Args) == 2 && os.Args[1] == "init" {
 		if PathExists("sqlc.yml") {
 			log.Printf("Not creating sqlc.yml as it already exists")
 		} else {
