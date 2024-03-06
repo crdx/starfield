@@ -37,8 +37,10 @@ func doInit() {
 	sqlc := "sqlc.yml"
 	migrationsDir := "src/migrations"
 	schema := "0000000000_schema.sql"
+	schemaPath := path.Join(migrationsDir, schema)
 	queriesDir := "queries"
 	query := "foos.sql"
+	queryPath := path.Join(queriesDir, query)
 
 	if pathExists(sqlc) {
 		log.Printf(col.Yellow("skip %s"), sqlc)
@@ -55,16 +57,24 @@ func doInit() {
 		log.Printf(col.Red("mkdir %s: %s"), migrationsDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), migrationsDir)
-		log.Printf(col.Green("write %s/%s"), migrationsDir, schema)
-		lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", migrationsDir, schema), migrationTemplate, 0o644))
+		if pathExists(schemaPath) {
+			log.Printf(col.Yellow("skip %s"), schemaPath)
+		} else {
+			log.Printf(col.Green("write %s/%s"), migrationsDir, schema)
+			lo.Must0(os.WriteFile(schemaPath, migrationTemplate, 0o644))
+		}
 	}
 
 	if err := os.MkdirAll(queriesDir, 0o755); err != nil {
 		log.Printf(col.Red("mkdir %s: %s"), queriesDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), queriesDir)
-		log.Printf(col.Green("write %s/%s"), queriesDir, query)
-		lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", queriesDir, query), queryTemplate, 0o644))
+		if pathExists(queryPath) {
+			log.Printf(col.Yellow("skip %s"), queryPath)
+		} else {
+			log.Printf(col.Green("write %s/%s"), queriesDir, query)
+			lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", queriesDir, query), queryTemplate, 0o644))
+		}
 	}
 }
 
