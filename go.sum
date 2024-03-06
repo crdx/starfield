@@ -1,3 +1,5 @@
+crdx.org/col v1.1.1 h1:fMzAfKPrdvvxpa2RD6G7PmfGZyA3JOm+qqWZbJDpadc=
+crdx.org/col v1.1.1/go.mod h1:bfSo/5WjHOVcNHsEsiGvwA8bwDo4FqfBlDlaUU4W7EE=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=

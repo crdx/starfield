@@ -3,6 +3,7 @@ module crdx.org/starfield
 go 1.22
 
 require (
+	crdx.org/col v1.1.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/jinzhu/inflection v1.0.0
 	github.com/samber/lo v1.39.0
