@@ -144,9 +144,12 @@
 			ParseTime:            true,
 			AllowNativePasswords: true,
 			Loc:                  self.Location,
-			Params: map[string]string{
+		}
+
+		if self.Charset != "" {
+			base.Params = map[string]string{
 				"charset": self.Charset,
-			},
+			}
 		}
 
 		if self.Socket != "" {
