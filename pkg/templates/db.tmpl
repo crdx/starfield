@@ -138,18 +138,23 @@
 	}
 
 	func (self *Config) baseMySQLConfig() *mysql.Config {
+		if self.Charset == "" {
+			self.Charset = "utf8mb4"
+		}
+
+		if self.Location == nil {
+			self.Location = time.UTC
+		}
+
 		base := mysql.Config{
 			User:                 self.User,
 			Passwd:               self.Pass,
 			ParseTime:            true,
 			AllowNativePasswords: true,
 			Loc:                  self.Location,
-		}
-
-		if self.Charset != "" {
-			base.Params = map[string]string{
+			Params: map[string]string{
 				"charset": self.Charset,
-			}
+			},
 		}
 
 		if self.Socket != "" {
