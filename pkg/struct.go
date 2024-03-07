@@ -4,8 +4,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
@@ -25,37 +23,6 @@ type Struct struct {
 	HasID        bool
 }
 
-func getStructName(name string, options *Options) string {
-	if rename := options.Rename[name]; rename != "" {
-		return rename
-	}
-	out := ""
-	name = strings.Map(func(r rune) rune {
-		if unicode.IsLetter(r) {
-			return r
-		}
-		if unicode.IsDigit(r) {
-			return r
-		}
-		return rune('_')
-	}, name)
-
-	for _, p := range strings.Split(name, "_") {
-		if p == "id" {
-			out += "ID"
-		} else {
-			out += strings.Title(p)
-		}
-	}
-
-	r, _ := utf8.DecodeRuneInString(out)
-	if unicode.IsDigit(r) {
-		return "_" + out
-	} else {
-		return out
-	}
-}
-
 func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 	var structs []Struct
 	for _, schema := range req.Catalog.Schemas {
@@ -73,7 +40,7 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 			structName := toSingular(tableName, options.PreserveTables)
 			s := Struct{
 				Table:   &plugin.Identifier{Schema: schema.Name, Name: table.Rel.Name},
-				Name:    getStructName(structName, options),
+				Name:    getIdentifierName(structName, options),
 				Comment: table.Comment,
 				IsView:  strings.HasSuffix(tableName, "_view"),
 			}
@@ -84,7 +51,7 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 				}
 				s.Fields = append(s.Fields, Field{
 					Nullable: !column.NotNull,
-					Name:     getStructName(column.Name, options),
+					Name:     getIdentifierName(column.Name, options),
 					Type:     getGoType(column),
 					Tags:     tags,
 					Column:   column,

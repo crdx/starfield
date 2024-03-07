@@ -1,0 +1,21 @@
+// -*- go -*-
+{{ define "drop" }}
+	func dropDatabase(dsn *DSN, dbName string) (bool, error) {
+		connection, err := config.Open(dsn)
+		if err != nil {
+			return false, err
+		}
+		defer connection.Close()
+
+		result, err := connection.Exec("DROP DATABASE IF EXISTS " + dbName)
+		if err != nil {
+			return false, err
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+
+		return rowsAffected > 0, nil
+	}
+{{ end }}

@@ -1,0 +1,58 @@
+// -*- go -*-
+{{ define "migrate" }}
+	type Migration struct {
+		Name string
+		SQL  string
+	}
+
+	func migrate(dsn *DSN) error {
+		connection, err := config.Open(dsn)
+		if err != nil {
+			return err
+		}
+		defer connection.Close()
+
+		_, err = connection.Exec(`CREATE TABLE IF NOT EXISTS migrations (id varchar(255) NOT NULL, ts datetime DEFAULT NULL, PRIMARY KEY (id))`)
+		if err != nil {
+			return err
+		}
+
+		rows, err := connection.Query("SELECT id FROM migrations")
+		if err != nil {
+			return err
+		}
+
+		ran := map[string]bool{}
+		for rows.Next() {
+			var id string
+			rows.Scan(&id)
+			ran[id] = true
+		}
+
+		for _, migration := range config.Migrations {
+			if ran[migration.Name] {
+				continue
+			}
+
+			if config.EnableLogger {
+				log.Printf("\033[33mMigrating: %s\033[0m", migration.Name)
+			}
+
+			_, err = connection.Exec(migration.SQL)
+			if err != nil {
+				return err
+			}
+
+			_, err = connection.Exec(
+				"INSERT INTO migrations (id, ts) VALUES (?, ?)",
+				migration.Name,
+				time.Now().UTC(),
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+{{ end }}

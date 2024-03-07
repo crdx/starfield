@@ -1,0 +1,103 @@
+// -*- go -*-
+{{ define "dsn" }}
+	type DSN struct {
+		Username             string         // Username
+		Password             string         // Password
+		Protocol             string         // Protocol (tcp, tcp6, unix)
+		Address              string         // Address
+		DBName               string         // Database name
+		Charset              string         // Character set
+		Timezone             *time.Location // Timezone for time.Time values [default: time.UTC]
+		ParseTime            bool           // Parse time values to time.Time
+		MultiStatements      bool           // Allow multiple statements in one query
+		AllowNativePasswords bool           // Allow native password authentication
+	}
+
+	func NewDSN() *DSN {
+		return &DSN{
+			Timezone:             time.UTC,
+			ParseTime:            true,
+			AllowNativePasswords: true,
+		}
+	}
+
+	func (self *DSN) Clone() *DSN {
+		clone := *self
+		return &clone
+	}
+
+	// Apply applies the given functions to the current DSN object.
+	func (self *DSN) Apply(funcs ...func(*DSN) *DSN) *DSN {
+		for _, f := range funcs {
+			f(self)
+		}
+		return self
+	}
+
+	// Format formats the current DSN into a string.
+	func (self *DSN) Format() string {
+		var buf bytes.Buffer
+
+		// [username[:password]@]
+		if len(self.Username) > 0 {
+			buf.WriteString(self.Username)
+			if len(self.Password) > 0 {
+				buf.WriteByte(':')
+				buf.WriteString(self.Password)
+			}
+			buf.WriteByte('@')
+		}
+
+		// [protocol[(address)]]
+		if len(self.Protocol) > 0 {
+			buf.WriteString(self.Protocol)
+			if len(self.Address) > 0 {
+				buf.WriteByte('(')
+				buf.WriteString(self.Address)
+				buf.WriteByte(')')
+			}
+		}
+
+		// /dbname
+		buf.WriteByte('/')
+		buf.WriteString(url.PathEscape(self.DBName))
+
+		// [?param1=value1&...&paramN=valueN]
+		hasParam := false
+
+		if !self.AllowNativePasswords {
+			writeDSNParam(&buf, &hasParam, "allowNativePasswords", "false")
+		}
+
+		if self.Timezone != time.UTC && self.Timezone != nil {
+			writeDSNParam(&buf, &hasParam, "loc", url.QueryEscape(self.Timezone.String()))
+		}
+
+		if self.Charset != "" {
+			writeDSNParam(&buf, &hasParam, "charset", self.Charset)
+		}
+
+		if self.MultiStatements {
+			writeDSNParam(&buf, &hasParam, "multiStatements", "true")
+		}
+
+		if self.ParseTime {
+			writeDSNParam(&buf, &hasParam, "parseTime", "true")
+		}
+
+		return buf.String()
+	}
+
+	func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
+		buf.Grow(1 + len(name) + 1 + len(value))
+		if !*hasParam {
+			*hasParam = true
+			buf.WriteByte('?')
+		} else {
+			buf.WriteByte('&')
+		}
+		buf.WriteString(name)
+		buf.WriteByte('=')
+		buf.WriteString(value)
+	}
+{{ end }}

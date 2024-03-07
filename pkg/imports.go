@@ -38,17 +38,17 @@ func (self *Importer) usesType(typ string) bool {
 func (self *Importer) mainImports() FileImports {
 	std, pkg := buildImports(nil, self.usesType)
 
+	std["bytes"] = true
 	std["database/sql"] = true
 	std["errors"] = true
 	std["fmt"] = true
 	std["log"] = true
+	std["net/url"] = true
 	std["os"] = true
 	std["reflect"] = true
 	std["regexp"] = true
 	std["strings"] = true
 	std["time"] = true
-
-	pkg["github.com/go-sql-driver/mysql"] = true
 
 	return sortImports(std, pkg)
 }

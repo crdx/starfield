@@ -1,5 +1,208 @@
+// -*- go -*-
 {{ define "main" }}
 	{{ template "header" . }}
-	{{ template "db" . }}
+
+	type Connection interface {
+		Exec(string, ...any) (sql.Result, error)
+		Query(string, ...any) (*sql.Rows, error)
+		QueryRow(string, ...any) *sql.Row
+	}
+
+	var (
+		connection         Connection
+		previousConnection Connection
+		config             *Config
+	)
+
+	type Config struct {
+		// A function that opens a database connection using a DSN. If the DataSource is omitted nil
+		// will be passed to this method, which indicates that you want to handle the DSN yourself.
+		Open func(*DSN) (*sql.DB, error)
+
+		// The DSN. Omit this if you want to handle the DSN yourself in the Open method.
+		DataSource *DSN
+
+		Migrations   []Migration // Migrations to run.
+		Fresh        bool        // Drop and recreate the database (e.g. for tests). Implies Create.
+		Create       bool        // Create the database if it does not exist.
+		EnableLogger bool        // Log queries and their execution time to stderr.
+		ErrorHandler func(error) // Alternative error handler to panic().
+		Seed         func()      // Database seeder which only runs if the database is freshly created.
+	}
+
+	// Initialise the database.
+	func Init(c *Config) error {
+		config = c
+		return doInit()
+	}
+
+	func doInit() error {
+		var baseDSN *DSN
+		if config.DataSource != nil {
+			// The base DSN has no database name.
+			baseDSN = config.DataSource.Clone()
+			baseDSN.DBName = ""
+		}
+
+		var seed bool
+		if config.Fresh {
+			if dropped, err := dropDatabase(baseDSN, config.DataSource.DBName); err != nil {
+				return err
+			} else if dropped {
+				seed = true
+			}
+		}
+
+		if config.Create || config.Fresh {
+			if created, err := createDatabase(baseDSN, config.DataSource.DBName); err != nil {
+				return err
+			} else if created {
+				seed = true
+			}
+		}
+
+		var migratorDSN *DSN
+		if config.DataSource != nil {
+			// The migrator DSN supports multiple statements so it can run migrations.
+			migratorDSN = config.DataSource.Clone()
+			migratorDSN.MultiStatements = true
+		}
+
+		if err := migrate(migratorDSN); err != nil {
+			return err
+		}
+
+		var err error
+		connection, err = config.Open(config.DataSource)
+
+		if err == nil && seed && config.Seed != nil {
+			config.Seed()
+		}
+
+		return err
+	}
+
+	// Query is the escape hatch that lets you call the underlying Query method.
+	func Query(query string, args ...any) (*sql.Rows, error) {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				logQuery(formatQuery(query, args...), time.Since(t))
+			}()
+		}
+		return connection.Query(query, args...)
+	}
+
+	// Exec is the escape hatch that lets you call the underlying Exec method.
+	func Exec(query string, args ...any) (sql.Result, error) {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				logQuery(formatQuery(query, args...), time.Since(t))
+			}()
+		}
+		return connection.Exec(query, args...)
+	}
+
+	// QueryRow is the escape hatch that lets you call the underlying QueryRow method.
+	func QueryRow(query string, args ...any) *sql.Row {
+		if config.EnableLogger {
+			t := time.Now()
+			defer func() {
+				logQuery(formatQuery(query, args...), time.Since(t))
+			}()
+		}
+		return connection.QueryRow(query, args...)
+	}
+
+	// NSlice converts a []T into a []sql.Null[T], effectively wrapping each slice element in
+	// sql.Null[T].
+	func NSlice[T any](v []T) []sql.Null[T] {
+		var items []sql.Null[T]
+		for _, item := range v {
+			items = append(items, N(item))
+		}
+		return items
+	}
+
+	// N converts a T into a sql.Null[T].
+	func N[T any](v T) sql.Null[T] {
+		return sql.Null[T]{V: v, Valid: true}
+	}
+
+	// NTime parses a string into a valid sql.Null[time.Time]. If it cannot be parsed, it returns a null
+	// instance of sql.Null[time.Time].
+	func NTime(s string, layout string) sql.Null[time.Time] {
+		var v sql.Null[time.Time]
+		t, err := time.Parse(layout, s)
+		if err != nil {
+			return v
+		}
+		if s != "" {
+			v.V = t
+			v.Valid = true
+		}
+		return v
+	}
+
+	// Now returns the current time.Time in UTC.
+	func Now() time.Time {
+		return time.Now().UTC()
+	}
+
+	// ToTime returns the time.Time that corresponds to the passed value. The value must be either
+	// time.Time or sql.Null[time.Time].
+	func ToTime(v any) (time.Time, bool) {
+		switch t := v.(type) {
+		case sql.Null[time.Time]:
+			if t.Valid {
+				return t.V, true
+			}
+		case time.Time:
+			return t, true
+		}
+		return time.Time{}, false
+	}
+
+	func Pluck[T any, U any](items []U, field string) []T {
+		var values []T
+		for _, item := range items {
+			values = append(values, reflect.ValueOf(item).FieldByName(field).Interface().(T))
+		}
+		return values
+	}
+
+	// MapByID maps a slice of T to a map[int64]T using the ID field as the key. If T is not a struct,
+	// or the ID field does not exist in T, this function will panic.
+	func MapByID[T any](items []T) map[int64]T {
+		return MapBy[int64]("ID", items)
+	}
+
+	// MapBy maps a slice of T to a map[A]T using keyField as the key. If T is not a struct, or
+	// keyField does not exist in T, this function will panic.
+	func MapBy[A comparable, T any](keyField string, items []T) map[A]T {
+		return sliceToMap(items, func(item T) (A, T) {
+			return reflect.ValueOf(item).FieldByName(keyField).Interface().(A), item
+		})
+	}
+
+	// MapBy2 maps a slice of T to a map[A]B using keyField and valueField as the key and value. If T
+	// is not a struct, or keyField or valueField do not exist in T, this function will panic.
+	func MapBy2[A comparable, B any, T any](keyField, valueField string, items []T) map[A]B {
+		return sliceToMap(items, func(item T) (A, B) {
+			v := reflect.ValueOf(item)
+			keyFieldValue := v.FieldByName(keyField)
+			valueFieldValue := v.FieldByName(valueField)
+			return convertValue[A](keyFieldValue),
+				convertValue[B](valueFieldValue)
+		})
+	}
+
+	{{ template "migrate" . }}
+	{{ template "transaction" . }}
+	{{ template "create" . }}
+	{{ template "drop" . }}
+	{{ template "dsn" . }}
+	{{ template "util" . }}
 	{{ template "models" . }}
 {{ end }}

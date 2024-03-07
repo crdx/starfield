@@ -97,7 +97,7 @@ func columnsToStruct(options *Options, name string, columns []Column, useID bool
 	for i, column := range columns {
 		columnName := getColumnName(column.Column, i)
 
-		fieldName := getStructName(columnName, options)
+		fieldName := getIdentifierName(columnName, options)
 		baseFieldName := fieldName
 		suffix := 0
 

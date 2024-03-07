@@ -1,0 +1,42 @@
+// -*- go -*-
+{{ define "transaction" }}
+	// BeginTransaction starts a new transaction. If one has already been started, this function
+	// returns an error. All subsequent database calls will take place within this transaction,
+	// so this is NOT thread-safe.
+	func BeginTransaction() error {
+		if previousConnection == nil {
+			previousConnection = connection
+			var err error
+			connection, err = connection.(*sql.DB).Begin()
+			if err != nil {
+				return err
+			}
+		}
+		return errors.New("transaction already started")
+	}
+
+	// CommitTransaction commits the current transaction, if any.
+	func CommitTransaction() error {
+		if previousConnection == nil {
+			return errors.New("no transaction")
+		}
+		err := connection.(*sql.Tx).Commit()
+		connection = previousConnection
+		previousConnection = nil
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// RollbackTransaction rolls back the current transaction, if any.
+	func RollbackTransaction() error {
+		if previousConnection == nil {
+			return errors.New("no transaction")
+		}
+		err := connection.(*sql.Tx).Rollback()
+		connection = previousConnection
+		previousConnection = nil
+		return err
+	}
+{{ end }}

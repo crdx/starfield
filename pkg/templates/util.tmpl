@@ -1,0 +1,109 @@
+// -*- go -*-
+{{ define "util" }}
+	func logQuery(s string, d time.Duration) {
+		log.Printf("[\033[33m%3dms\033[0m] %s", d.Truncate(time.Millisecond).Milliseconds(), s)
+	}
+
+	func formatQuery(query string, args ...any) string {
+		for _, arg := range args {
+			var s string
+			switch a := arg.(type) {
+			case bool:
+				if a {
+					s = "1"
+				} else {
+					s = "0"
+				}
+			case int64, float64:
+				s = fmt.Sprintf("%v", a)
+			case sql.Null[time.Time]:
+				if a.Valid {
+					s = fmt.Sprintf("%q", a.V.Format(time.DateTime))
+				} else {
+					s = "NULL"
+				}
+			case sql.Null[int64]:
+				if a.Valid {
+					s = fmt.Sprintf("%v", a.V)
+				} else {
+					s = "NULL"
+				}
+			case sql.Null[float64]:
+				if a.Valid {
+					s = fmt.Sprintf("%v", a.V)
+				} else {
+					s = "NULL"
+				}
+			case time.Time:
+				s = fmt.Sprintf("%q", a.Format(time.DateTime))
+			default:
+				s = fmt.Sprintf("%q", a)
+			}
+			query = strings.Replace(query, "?", s, 1)
+		}
+		query = strings.ReplaceAll(strings.TrimSpace(query), "\n", " ")
+		query = regexp.MustCompile(`\s+`).ReplaceAllString(query, " ")
+		return query
+	}
+
+	func listFileNames(dir string) []string {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return nil
+		}
+
+		var names []string
+		for _, entry := range entries {
+			names = append(names, entry.Name())
+		}
+		return names
+	}
+
+	func handleError(err error) {
+		if config.ErrorHandler != nil {
+			config.ErrorHandler(err)
+		} else {
+			panic(err)
+		}
+	}
+
+	// canBeNil checks if the reflect.Value can be nil based on its kind.
+	func canBeNil(v reflect.Value) bool {
+		switch v.Kind() {
+		case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Chan, reflect.Interface, reflect.Func:
+			return true
+		default:
+			return false
+		}
+	}
+
+	// zeroValue returns a pointer to a new zero value of type T.
+	func zeroValue[T any]() T {
+		var zero T
+		return zero
+	}
+
+	// SliceToMap returns a map containing key-value pairs provided by transform function applied to
+	// elements of the given slice. If any of two pairs would have the same key the last one gets added
+	// to the map. The order of keys in returned map is not specified and is not guaranteed to be the
+	// same from the original array.
+	func sliceToMap[T any, K comparable, V any](collection []T, transform func(item T) (K, V)) map[K]V {
+		result := make(map[K]V, len(collection))
+
+		for _, t := range collection {
+			k, v := transform(t)
+			result[k] = v
+		}
+
+		return result
+	}
+
+	// convertValue converts a reflect.Value into T taking into account nil.
+	func convertValue[T any](v reflect.Value) T {
+		if canBeNil(v) && v.IsNil() {
+			return zeroValue[T]()
+		} else {
+			return v.Interface().(T)
+		}
+	}
+{{ end }}

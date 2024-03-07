@@ -248,7 +248,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 				same := true
 				for i, f := range s.Fields {
 					column := sourceQuery.Columns[i]
-					sameName := f.Name == getStructName(getColumnName(column, i), options)
+					sameName := f.Name == getIdentifierName(getColumnName(column, i), options)
 					sameType := f.Type == getGoType(column)
 					sameTable := sdk.SameTableName(column.Table, s.Table, req.Catalog.DefaultSchema)
 					if !sameName || !sameType || !sameTable {
