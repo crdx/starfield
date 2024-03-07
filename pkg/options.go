@@ -37,7 +37,7 @@ func parseOptions(req *plugin.GenerateRequest) (*Options, error) {
 	}
 
 	if options.MaxParams.IsAbsent() {
-		options.MaxParams = mo.Some[int](1)
+		options.MaxParams = mo.Some[int](3)
 	}
 
 	return &options, nil

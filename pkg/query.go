@@ -27,11 +27,11 @@ func (self Query) hasRetType() bool {
 }
 
 type QueryValue struct {
-	Emit   bool
-	Name   string
-	Struct *Struct
-	Typ    string
-	Column *plugin.Column
+	EmitAsStruct bool
+	Name         string
+	Struct       *Struct
+	Typ          string
+	Column       *plugin.Column
 }
 
 type Argument struct {
@@ -40,7 +40,7 @@ type Argument struct {
 }
 
 func (self QueryValue) EmitStruct() bool {
-	return self.Emit
+	return self.EmitAsStruct
 }
 
 func (self QueryValue) IsStruct() bool {
@@ -182,13 +182,6 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 	queries := make([]Query, 0, len(req.Queries))
 
 	for _, sourceQuery := range req.Queries {
-		if sourceQuery.Name == "" {
-			continue
-		}
-		if sourceQuery.Cmd == "" {
-			continue
-		}
-
 		query := Query{
 			Command:      sourceQuery.Cmd,
 			ConstantName: sdk.LowerTitle(sourceQuery.Name),
@@ -198,48 +191,37 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 			Comments:     sourceQuery.Comments,
 		}
 
-		queryParameterLimit := options.MaxParams.MustGet()
+		maxParams := options.MaxParams.MustGet()
 
-		if len(sourceQuery.Params) == 1 && queryParameterLimit != 0 {
-			p := sourceQuery.Params[0]
-			query.Argument = QueryValue{
-				Name:   escape(getParamName(p)),
-				Typ:    getGoType(p.Column),
-				Column: p.Column,
-			}
-		} else if len(sourceQuery.Params) >= 1 {
-			var cols []Column
-			for _, p := range sourceQuery.Params {
-				cols = append(cols, Column{
-					id:     int(p.Number),
-					Column: p.Column,
+		if len(sourceQuery.Params) > 0 {
+			var columns []Column
+			for _, param := range sourceQuery.Params {
+				columns = append(columns, Column{
+					id:     int(param.Number),
+					Column: param.Column,
 				})
 			}
-			s, err := columnsToStruct(options, query.MethodName+"Params", cols, false)
+			s, err := columnsToStruct(options, query.MethodName+"Params", columns, false)
 			if err != nil {
 				return nil, err
 			}
+
 			query.Argument = QueryValue{
-				Emit:   true,
-				Name:   "arg",
-				Struct: s,
-			}
-			if len(sourceQuery.Params) <= queryParameterLimit {
-				query.Argument.Emit = false
+				EmitAsStruct: shouldEmitAsStruct(sourceQuery.Params, maxParams),
+				Name:         "arg",
+				Struct:       s,
 			}
 		}
 
 		if len(sourceQuery.Columns) == 1 {
 			column := sourceQuery.Columns[0]
-			name := getColumnName(column, 0)
-			name = strings.Replace(name, "$", "_", -1)
 			query.ReturnValue = QueryValue{
-				Name: escape(name),
+				Name: escape(getColumnName(column, 0)),
 				Typ:  getGoType(column),
 			}
 		} else if returnsData(sourceQuery) {
 			var gs *Struct
-			var emit bool
+			var emitAsStruct bool
 
 			for _, s := range structs {
 				if len(s.Fields) != len(sourceQuery.Columns) {
@@ -274,19 +256,53 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 				if err != nil {
 					return nil, err
 				}
-				emit = true
+				emitAsStruct = true
 			}
 			query.ReturnValue = QueryValue{
-				Emit:   emit,
-				Name:   "item",
-				Struct: gs,
+				EmitAsStruct: emitAsStruct,
+				Name:         "item",
+				Struct:       gs,
 			}
 		}
 
 		queries = append(queries, query)
 	}
-	sort.Slice(queries, func(i, j int) bool { return queries[i].MethodName < queries[j].MethodName })
+
+	sort.Slice(queries, func(i, j int) bool {
+		return queries[i].MethodName < queries[j].MethodName
+	})
+
 	return queries, nil
+}
+
+func shouldEmitAsStruct(params []*plugin.Parameter, maxParams int) bool {
+	if maxParams < 0 {
+		return false
+	}
+
+	// maxParams is a hard limit to the maximum number of function arguments.
+	if len(params) > maxParams {
+		return true
+	}
+
+	// Otherwise, as long as it's not a mix of updates and conditionals, go for it.
+	updateCount, conditionalCount := classifyParams(params)
+	return updateCount > 0 && conditionalCount > 0
+}
+
+func classifyParams(params []*plugin.Parameter) (updateCount int, conditionalCount int) {
+	// This is probably an sqlc implementation detail, but for lack of a better way, this will have to
+	// do.
+	for _, param := range params {
+		if param.Column.Table == nil {
+			conditionalCount++
+		} else if param.Column.Table.Schema != "" {
+			updateCount++
+		} else {
+			conditionalCount++
+		}
+	}
+	return
 }
 
 func getMethod(query Query) string {
