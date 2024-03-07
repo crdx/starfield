@@ -9,6 +9,7 @@ sql:
         out: src/db
         options:
           package: db
+          max_params: 3
           # preserve_tables:
           #   - foo_data # not "datum"
           # rename:
