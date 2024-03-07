@@ -10,3 +10,6 @@ insert_final_newline = true
 
 [*.tmpl]
 indent_style = tab
+
+[*.yml.template]
+indent_size = 2
