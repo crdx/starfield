@@ -245,10 +245,10 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 
 			if gs == nil {
 				var columns []Column
-				for i, c := range sourceQuery.Columns {
+				for i, column := range sourceQuery.Columns {
 					columns = append(columns, Column{
 						id:     i,
-						Column: c,
+						Column: column,
 					})
 				}
 				var err error
