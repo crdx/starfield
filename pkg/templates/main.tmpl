@@ -44,15 +44,13 @@
 			baseDSN.DBName = ""
 		}
 
-		var seed bool
 		if config.Fresh {
-			if dropped, err := dropDatabase(baseDSN, config.DataSource.DBName); err != nil {
+			if _, err := dropDatabase(baseDSN, config.DataSource.DBName); err != nil {
 				return err
-			} else if dropped {
-				seed = true
 			}
 		}
 
+		var seed bool
 		if config.Create || config.Fresh {
 			if created, err := createDatabase(baseDSN, config.DataSource.DBName); err != nil {
 				return err
