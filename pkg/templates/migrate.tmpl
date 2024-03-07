@@ -35,12 +35,12 @@
 			}
 
 			if config.EnableLogger {
-				log.Printf("\033[33mMigrating: %s\033[0m", migration.Name)
+				log.Printf("\033[33mRunning migration %s\033[0m", migration.Name)
 			}
 
 			_, err = connection.Exec(migration.SQL)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %w", migration.Name, err)
 			}
 
 			_, err = connection.Exec(
