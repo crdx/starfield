@@ -208,7 +208,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 
 			query.Argument = QueryValue{
 				EmitAsStruct: shouldEmitAsStruct(sourceQuery.Params, maxParams),
-				Name:         "arg",
+				Name:         "params",
 				Struct:       s,
 			}
 		}
