@@ -12,12 +12,17 @@
 		}
 		defer connection.Close()
 
-		_, err = connection.Exec(`CREATE TABLE IF NOT EXISTS migrations (id varchar(255) NOT NULL, ts datetime DEFAULT NULL, PRIMARY KEY (id))`)
+		_, err = connection.Exec(`
+			create table if not exists migrations (
+				name varchar(512) not null primary key,
+				migrated_at datetime not null
+			)
+		`)
 		if err != nil {
 			return err
 		}
 
-		rows, err := connection.Query("SELECT id FROM migrations")
+		rows, err := connection.Query("select name from migrations")
 		if err != nil {
 			return err
 		}
@@ -44,7 +49,7 @@
 			}
 
 			_, err = connection.Exec(
-				"INSERT INTO migrations (id, ts) VALUES (?, ?)",
+				"insert into migrations (name, migrated_at) values (?, ?)",
 				migration.Name,
 				time.Now().UTC(),
 			)
