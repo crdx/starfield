@@ -32,7 +32,7 @@
 	}
 
 	// Find{{ $name }} finds an instance of {{ $name }} by ID.
-	func Find{{ $name }}(id int64) ({{ $name }}, bool) {
+	func Find{{ $name }}[T Integer](id T) ({{ $name }}, bool) {
 		row := QueryRow(`
 		select {{ .FieldNames }}
 		from {{ $table.Name }}
