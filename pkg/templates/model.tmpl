@@ -8,7 +8,7 @@
 	// Create{{ $name }} creates a new instance of {{ $name }}.
 	func Create{{ $name }}(value *{{ $name }}) *{{ $name }} {
 		{{- if .HasCreatedAt }}
-			value.CreatedAt = time.Now().UTC()
+			value.CreatedAt = Now()
 		{{ end -}}
 		result, err := Exec(`
 		insert into {{ $table.Name }} (
@@ -120,7 +120,7 @@
 
 		// Delete soft deletes this instance of {{ $name }}.
 		func (self *{{ $name }}) Delete() bool {
-			result, err := Exec(`update {{ $table.Name }} set deleted_at = ? where id = ?`, time.Now().UTC(), self.ID)
+			result, err := Exec(`update {{ $table.Name }} set deleted_at = ? where id = ?`, Now(), self.ID)
 			if err != nil {
 				handleError(err)
 			}
