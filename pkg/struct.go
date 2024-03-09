@@ -18,9 +18,10 @@ type Struct struct {
 	FieldNames   string
 	Placeholders string
 
-	HasDeletedAt bool
-	HasCreatedAt bool
-	HasID        bool
+	HasDeletedAt         bool
+	HasCreatedAt         bool
+	HasNullableCreatedAt bool
+	HasID                bool
 }
 
 func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
@@ -58,12 +59,17 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 				})
 			}
 
+			fieldMap := lo.SliceToMap(s.Fields, func(field Field) (string, Field) {
+				return field.Column.Name, field
+			})
+
 			fieldNames := lo.Map(s.Fields, func(field Field, _ int) string {
 				return field.Column.Name
 			})
 
-			s.FieldNames = strings.Join(fieldNames, ", ")
+			s.FieldNames = "`" + strings.Join(fieldNames, "`, `") + "`"
 			s.HasDeletedAt = slices.Contains(fieldNames, "deleted_at")
+			s.HasNullableCreatedAt = fieldMap["created_at"].Nullable
 			s.HasCreatedAt = slices.Contains(fieldNames, "created_at")
 			s.HasID = slices.Contains(fieldNames, "id")
 			s.Placeholders = strings.Join(fillSlice(len(s.Fields), "?"), ", ")
