@@ -30,7 +30,9 @@
 		ran := map[string]bool{}
 		for rows.Next() {
 			var id string
-			rows.Scan(&id)
+			if err := rows.Scan(&id); err != nil {
+				return err
+			}
 			ran[id] = true
 		}
 
