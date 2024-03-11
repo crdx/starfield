@@ -10,11 +10,13 @@
 	// Create{{ $name }} creates a new instance of {{ $name }}.
 	func Create{{ $name }}(value *{{ $name }}) *{{ $name }} {
 		{{- if $hasCreatedAt -}}
-			{{ if .HasNullableCreatedAt -}}
+		if value.CreatedAt.IsZero() {
+			{{- if .HasNullableCreatedAt -}}
 				value.CreatedAt = N(Now())
 			{{ else }}
 				value.CreatedAt = Now()
 			{{- end }}
+		}
 		{{ end -}}
 		{{ if $hasID }}result{{ else }}_{{ end }}, err := Exec("insert into `{{ $table.Name }}` ({{ $fieldNames }}) values ({{ .Placeholders }})",
 			{{- range $fields }}
