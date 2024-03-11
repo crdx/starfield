@@ -80,7 +80,7 @@
 		return err
 	}
 
-	// Query is the escape hatch that lets you call the underlying Query method.
+	// Query is the escape hatch that lets you call the underlying sql.DB.Query method.
 	func Query(query string, args ...any) (*sql.Rows, error) {
 		if config.EnableLogger {
 			t := time.Now()
@@ -91,7 +91,7 @@
 		return connection.Query(query, args...)
 	}
 
-	// Exec is the escape hatch that lets you call the underlying Exec method.
+	// Exec is the escape hatch that lets you call the underlying sql.DB.Exec method.
 	func Exec(query string, args ...any) (sql.Result, error) {
 		if config.EnableLogger {
 			t := time.Now()
@@ -102,7 +102,7 @@
 		return connection.Exec(query, args...)
 	}
 
-	// QueryRow is the escape hatch that lets you call the underlying QueryRow method.
+	// QueryRow is the escape hatch that lets you call the underlying sql.DB.QueryRow method.
 	func QueryRow(query string, args ...any) *sql.Row {
 		if config.EnableLogger {
 			t := time.Now()
