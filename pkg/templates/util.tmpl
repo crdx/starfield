@@ -54,6 +54,7 @@
 			query = strings.Replace(query, "?", s, 1)
 		}
 		query = strings.ReplaceAll(strings.TrimSpace(query), "\n", " ")
+		query = strings.ReplaceAll(query, "`", "")
 		query = regexp.MustCompile(`\s+`).ReplaceAllString(query, " ")
 		return query
 	}
