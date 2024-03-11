@@ -41,11 +41,21 @@
 				continue
 			}
 
+			sql := strings.TrimSpace(migration.SQL)
+
 			if config.EnableLogger {
-				log.Printf("\033[33mRunning migration %s\033[0m", migration.Name)
+				if sql == "" {
+					log.Printf("\033[33mSkipping empty migration %s\033[0m", migration.Name)
+				} else {
+					log.Printf("\033[33mRunning migration %s\033[0m", migration.Name)
+				}
 			}
 
-			_, err = connection.Exec(migration.SQL)
+			if sql == "" {
+				continue
+			}
+
+			_, err = connection.Exec(sql)
 			if err != nil {
 				return fmt.Errorf("%s: %w", migration.Name, err)
 			}
