@@ -84,6 +84,15 @@
 		return items
 	}
 
+	{{ if $hasID }}
+		// Reload reloads this instance of {{ $name }}.
+		func (self *{{ $name }}) Reload() {
+			if s, found := Find{{ $name }}(self.ID); found {
+				*self = s
+			}
+		}
+	{{ end }}
+
 	{{ if $hasDeletedAt }}
 		// Find{{ $name }}sUnscoped finds all instances (including deleted) of {{ $name }}.
 		func Find{{ $name }}sUnscoped() []{{ $name }} {
