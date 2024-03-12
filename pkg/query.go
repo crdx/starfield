@@ -221,9 +221,10 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 				Typ:  getGoType(column),
 			}
 		} else if returnsData(sourceQuery) {
-			var gs *Struct
+			var foundStruct *Struct
 			var emitAsStruct bool
 
+			// Find a struct that we can use as the return value for this query.
 			for _, s := range structs {
 				if len(s.Fields) != len(sourceQuery.Columns) {
 					continue
@@ -239,12 +240,13 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 					}
 				}
 				if same {
-					gs = &s
+					foundStruct = &s
 					break
 				}
 			}
 
-			if gs == nil {
+			// We didn't find an existing one to use, so create a new one.
+			if foundStruct == nil {
 				var columns []Column
 				for i, column := range sourceQuery.Columns {
 					columns = append(columns, Column{
@@ -253,7 +255,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 					})
 				}
 				var err error
-				gs, err = columnsToStruct(options, query.MethodName+"Row", columns, true)
+				foundStruct, err = columnsToStruct(options, query.MethodName+"Row", columns, true)
 				if err != nil {
 					return nil, err
 				}
@@ -262,7 +264,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 			query.ReturnValue = QueryValue{
 				EmitAsStruct: emitAsStruct,
 				Name:         "item",
-				Struct:       gs,
+				Struct:       foundStruct,
 				Pointer:      true,
 			}
 		}
