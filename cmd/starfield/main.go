@@ -27,9 +27,11 @@ func main() {
 func doInit() {
 	log.SetFlags(0)
 	sqlc := "sqlc.yml"
-	migrationsDir := "src/migrations"
+	migrationsDir := "migrations"
 	schema := "0000000000_schema.sql"
+	list := "list.go"
 	schemaPath := path.Join(migrationsDir, schema)
+	listPath := path.Join(migrationsDir, list)
 	queriesDir := "queries"
 	query := "foos.sql"
 	queryPath := path.Join(queriesDir, query)
@@ -54,6 +56,12 @@ func doInit() {
 		} else {
 			log.Printf(col.Green("write %s/%s"), migrationsDir, schema)
 			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o644))
+		}
+		if pathExists(listPath) {
+			log.Printf(col.Yellow("skip %s"), listPath)
+		} else {
+			log.Printf(col.Green("write %s/%s"), migrationsDir, list)
+			lo.Must0(os.WriteFile(listPath, scaffold.ListGo, 0o644))
 		}
 	}
 

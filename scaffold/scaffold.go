@@ -10,3 +10,6 @@ var MigrationSQL []byte
 
 //go:embed query.sql
 var QuerySQL []byte
+
+//go:embed list.go.tmpl
+var ListGo []byte
