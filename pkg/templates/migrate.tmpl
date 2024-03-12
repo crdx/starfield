@@ -63,7 +63,7 @@
 			_, err = connection.Exec(
 				"insert into migrations (name, migrated_at) values (?, ?)",
 				migration.Name,
-				time.Now().UTC(),
+				Now().UTC(),
 			)
 			if err != nil {
 				return err
