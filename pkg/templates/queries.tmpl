@@ -104,7 +104,7 @@
 
 		{{ if eq .Command ":execrows" }}
 			{{ template "comments" .Comments -}}
-			func {{ .MethodName }}({{ .Argument.Pair }}) (int) {
+			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
@@ -121,7 +121,7 @@
 
 		{{ if eq .Command ":execlastid" }}
 			{{ template "comments" .Comments -}}
-			func {{ .MethodName }}({{ .Argument.Pair }}) (int) {
+			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
