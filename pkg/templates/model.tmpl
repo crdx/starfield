@@ -25,11 +25,13 @@
 		)
 		if err != nil {
 			handleError(err)
+			return nil
 		}
 		{{ if $hasID }}
 			lastInsertID, err := result.LastInsertId()
 			if err != nil {
 				handleError(err)
+				return nil
 			}
 			value.ID = lastInsertID
 		{{ end }}
@@ -51,6 +53,7 @@
 			}
 			if err != nil {
 				handleError(err)
+				return nil, false
 			}
 			return item, true
 		}
@@ -61,6 +64,7 @@
 		rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}`{{ if $hasDeletedAt }} where deleted_at is null{{ end }} order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 		if err != nil {
 			handleError(err)
+			return nil
 		}
 		defer rows.Close()
 		var items []*{{ $name }}
@@ -72,14 +76,17 @@
 				{{- end }}
 			); err != nil {
 				handleError(err)
+				return nil
 			}
 			items = append(items, item)
 		}
 		if err := rows.Close(); err != nil {
 			handleError(err)
+			return nil
 		}
 		if err := rows.Err(); err != nil {
 			handleError(err)
+			return nil
 		}
 		return items
 	}
@@ -99,6 +106,7 @@
 			rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}` order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 			if err != nil {
 				handleError(err)
+				return nil
 			}
 			defer rows.Close()
 			var items []*{{ $name }}
@@ -110,14 +118,17 @@
 					{{- end }}
 				); err != nil {
 					handleError(err)
+					return nil
 				}
 				items = append(items, item)
 			}
 			if err := rows.Close(); err != nil {
 				handleError(err)
+				return nil
 			}
 			if err := rows.Err(); err != nil {
 				handleError(err)
+				return nil
 			}
 			return items
 		}
@@ -128,10 +139,12 @@
 				result, err := Exec("update `{{ $table.Name }}` set deleted_at = ? where id = ?", Now(), self.ID)
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				rowsAffected, err := result.RowsAffected()
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				return rowsAffected > 0
 			}
@@ -141,10 +154,12 @@
 				result, err := Exec("update `{{ $table.Name }}` set deleted_at = null where id = ?", self.ID)
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				rowsAffected, err := result.RowsAffected()
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				return rowsAffected > 0
 			}
@@ -154,10 +169,12 @@
 				result, err := Exec("delete from `{{ $table.Name }}` where id = ?", self.ID)
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				rowsAffected, err := result.RowsAffected()
 				if err != nil {
 					handleError(err)
+					return false
 				}
 				return rowsAffected > 0
 			}
@@ -181,6 +198,7 @@
 				{{ end -}}
 				if err != nil {
 					handleError(err)
+					return nil
 				}
 				defer rows.Close()
 				var items []*{{ $name }}
@@ -192,14 +210,17 @@
 						{{- end }}
 					); err != nil {
 						handleError(err)
+						return nil
 					}
 					items = append(items, item)
 				}
 				if err := rows.Close(); err != nil {
 					handleError(err)
+					return nil
 				}
 				if err := rows.Err(); err != nil {
 					handleError(err)
+					return nil
 				}
 				return items
 			}
@@ -220,6 +241,7 @@
 					{{ end -}}
 					if err != nil {
 						handleError(err)
+						return nil
 					}
 					defer rows.Close()
 					var items []*{{ $name }}
@@ -231,14 +253,17 @@
 							{{- end }}
 						); err != nil {
 							handleError(err)
+							return nil
 						}
 						items = append(items, item)
 					}
 					if err := rows.Close(); err != nil {
 						handleError(err)
+						return nil
 					}
 					if err := rows.Err(); err != nil {
 						handleError(err)
+						return nil
 					}
 					return items
 				}
@@ -258,6 +283,7 @@
 				}
 				if err != nil {
 					handleError(err)
+					return nil, false
 				}
 				return item, true
 			}
@@ -268,10 +294,12 @@
 					result, err := Exec("update `{{ $table.Name }}` set `{{ .Tags.column }}` = ? where id = ?", value, self.ID)
 					if err != nil {
 						handleError(err)
+						return false
 					}
 					rowsAffected, err := result.RowsAffected()
 					if err != nil {
 						handleError(err)
+						return false
 					}
 					{{ if .Nullable }}
 						self.{{ .Name }} = sql.Null[{{ .BaseType }}]{V: value, Valid: true}
@@ -288,10 +316,12 @@
 					result, err := Exec("update `{{ $table.Name }}` set `{{ .Tags.column }}` = null where id = ?", self.ID)
 					if err != nil {
 						handleError(err)
+						return false
 					}
 					rowsAffected, err := result.RowsAffected()
 					if err != nil {
 						handleError(err)
+						return false
 					}
 					self.{{ .Name }} = sql.Null[{{ .BaseType }}]{}
 					return rowsAffected > 0

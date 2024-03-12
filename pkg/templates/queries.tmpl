@@ -35,6 +35,7 @@
 					}
 					if err != nil {
 						handleError(err)
+						return 0
 					}
 					return {{ .ReturnValue.ReturnName }}
 				}
@@ -54,6 +55,7 @@
 					}
 					if err != nil {
 						handleError(err)
+						return {{ .ReturnValue.ReturnName }}, false
 					}
 					return {{ .ReturnValue.ReturnName }}, true
 				}
@@ -66,6 +68,7 @@
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
+					return nil
 				}
 				defer rows.Close()
 				var items []{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}
@@ -77,14 +80,17 @@
 					{{- end }}
 					if err := rows.Scan({{ .ReturnValue.Scan }}); err != nil {
 						handleError(err)
+						return nil
 					}
 					items = append(items, {{ .ReturnValue.ReturnName }})
 				}
 				if err := rows.Close(); err != nil {
 					handleError(err)
+					return nil
 				}
 				if err := rows.Err(); err != nil {
 					handleError(err)
+					return nil
 				}
 				return items
 			}
@@ -106,9 +112,11 @@
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
+					return 0
 				}
 				if rowsAffected, err := result.RowsAffected(); err != nil {
 					handleError(err)
+					return 0
 				} else {
 					return rowsAffected
 				}
@@ -121,9 +129,11 @@
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
+					return 0
 				}
 				if lastInsertID, err := result.LastInsertId(); err != nil {
 					handleError(err)
+					return 0
 				} else {
 					return lastInsertID
 				}
