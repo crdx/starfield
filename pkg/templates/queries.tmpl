@@ -26,9 +26,7 @@
 			{{ if and (eq .ReturnValue.Name "count") (eq .ReturnValue.Typ "int64") }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 					{{- template "exec" . }}
-					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
-						var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
-					{{- end }}
+					var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
 					err := row.Scan({{ .ReturnValue.Scan }})
 					if err == sql.ErrNoRows {
 						return 0
@@ -42,12 +40,10 @@
 			{{ else }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) ({{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}, bool) {
 					{{- template "exec" . }}
-					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
-						{{- if .ReturnValue.Pointer }}
-							{{ .ReturnValue.ReturnName }} := new({{ .ReturnValue.Type }})
-						{{ else }}
-							var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
-						{{- end }}
+					{{- if .ReturnValue.Pointer }}
+						{{ .ReturnValue.ReturnName }} := new({{ .ReturnValue.Type }})
+					{{ else }}
+						var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
 					{{- end }}
 					err := row.Scan({{ .ReturnValue.Scan }})
 					if err == sql.ErrNoRows {
