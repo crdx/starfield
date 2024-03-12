@@ -3,10 +3,10 @@ sql:
   - name: {{ .Name }}
     engine: mysql
     queries: queries
-    schema: src/migrations
+    schema: migrations
     codegen:
       - plugin: starfield
-        out: src/db
+        out: db
         options:
           package: db
           max_params: 3

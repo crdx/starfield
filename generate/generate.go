@@ -1,21 +1,19 @@
-package starfield
+package generate
 
 import (
 	"bufio"
 	"bytes"
 	"context"
-	"embed"
 	"fmt"
 	"go/format"
 	"text/template"
+
+	"crdx.org/starfield/templates"
 
 	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
 	"github.com/sqlc-dev/plugin-sdk-go/sdk"
 )
-
-//go:embed templates/*
-var templates embed.FS
 
 type TemplateArgs struct {
 	Package    string
@@ -31,7 +29,7 @@ type File struct {
 	Template string
 }
 
-func Generate(ctx context.Context, req *plugin.GenerateRequest) (*plugin.GenerateResponse, error) {
+func Run(ctx context.Context, req *plugin.GenerateRequest) (*plugin.GenerateResponse, error) {
 	options, err := parseOptions(req)
 	if err != nil {
 		return nil, err
@@ -61,7 +59,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 	}
 
 	templateEngine := template.Must(
-		template.New("starfield").Funcs(funcMap).ParseFS(templates, "templates/*.tmpl"),
+		template.New("starfield").Funcs(funcMap).ParseFS(templates.All, "*"),
 	)
 
 	files := []File{
@@ -136,7 +134,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 
 	response := plugin.GenerateResponse{}
 	response.Files = append(response.Files, &plugin.File{
-		Name:     "db.go",
+		Name:     "db.gen.go",
 		Contents: []byte(code),
 	})
 

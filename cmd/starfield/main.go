@@ -9,7 +9,8 @@ import (
 	"text/template"
 
 	"crdx.org/col"
-	starfield "crdx.org/starfield/pkg"
+	"crdx.org/starfield/generate"
+	"crdx.org/starfield/scaffold"
 	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/codegen"
 )
@@ -20,17 +21,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	codegen.Run(starfield.Generate)
+	codegen.Run(generate.Run)
 }
-
-//go:embed sqlc.yml.template
-var sqlcTemplate string
-
-//go:embed migration.sql.template
-var migrationTemplate []byte
-
-//go:embed query.sql.template
-var queryTemplate []byte
 
 func doInit() {
 	log.SetFlags(0)
@@ -47,7 +39,7 @@ func doInit() {
 	} else {
 		log.Printf(col.Green("write %s"), sqlc)
 		file := lo.Must(os.OpenFile(sqlc, os.O_CREATE|os.O_WRONLY, 0o644))
-		lo.Must0(template.Must(template.New(sqlc).Parse(sqlcTemplate)).Execute(
+		lo.Must0(template.Must(template.New(sqlc).Parse(scaffold.SqlcYML)).Execute(
 			file,
 			map[string]string{"Name": path.Base(lo.Must(os.Getwd()))},
 		))
@@ -61,7 +53,7 @@ func doInit() {
 			log.Printf(col.Yellow("skip %s"), schemaPath)
 		} else {
 			log.Printf(col.Green("write %s/%s"), migrationsDir, schema)
-			lo.Must0(os.WriteFile(schemaPath, migrationTemplate, 0o644))
+			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o644))
 		}
 	}
 
@@ -73,7 +65,7 @@ func doInit() {
 			log.Printf(col.Yellow("skip %s"), queryPath)
 		} else {
 			log.Printf(col.Green("write %s/%s"), queriesDir, query)
-			lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", queriesDir, query), queryTemplate, 0o644))
+			lo.Must0(os.WriteFile(fmt.Sprintf("%s/%s", queriesDir, query), scaffold.QuerySQL, 0o644))
 		}
 	}
 }

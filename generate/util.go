@@ -1,4 +1,4 @@
-package starfield
+package generate
 
 import (
 	"fmt"
