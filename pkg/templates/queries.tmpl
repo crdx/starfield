@@ -138,7 +138,7 @@
 
 		{{ if eq .Command ":execresult" }}
 			{{ template "comments" .Comments -}}
-			func {{ .MethodName }}({{ .Argument.Pair }}) (sql.Result) {
+			func {{ .MethodName }}({{ .Argument.Pair }}) sql.Result {
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
