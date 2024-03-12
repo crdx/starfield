@@ -22,12 +22,12 @@
 		// The DSN. Omit this if you want to handle the DSN yourself in the Open method.
 		DataSource *DSN
 
-		Migrations   []Migration // Migrations to run.
-		Fresh        bool        // Drop and recreate the database (e.g. for tests). Implies Create.
-		Create       bool        // Create the database if it does not exist.
-		EnableLogger bool        // Log queries and their execution time to stderr.
-		ErrorHandler func(error) // Alternative error handler to panic().
-		Seed         func()      // Database seeder which only runs if the database is freshly created.
+		Migrations   []*Migration // Migrations to run.
+		Fresh        bool         // Drop and recreate the database (e.g. for tests). Implies Create.
+		Create       bool         // Create the database if it does not exist.
+		EnableLogger bool         // Log queries and their execution time to stderr.
+		ErrorHandler func(error)  // Alternative error handler to panic().
+		Seed         func()       // Database seeder which only runs if the database is freshly created.
 	}
 
 	// Initialise the database.
@@ -165,7 +165,7 @@
 	func Pluck[T any, U any](items []U, field string) []T {
 		var values []T
 		for _, item := range items {
-			values = append(values, reflect.ValueOf(item).FieldByName(field).Interface().(T))
+			values = append(values, reflect.ValueOf(item).Elem().FieldByName(field).Interface().(T))
 		}
 		return values
 	}
@@ -180,7 +180,7 @@
 	// keyField does not exist in T, this function will panic.
 	func MapBy[A comparable, T any](keyField string, items []T) map[A]T {
 		return sliceToMap(items, func(item T) (A, T) {
-			return reflect.ValueOf(item).FieldByName(keyField).Interface().(A), item
+			return reflect.ValueOf(item).Elem().FieldByName(keyField).Interface().(A), item
 		})
 	}
 
@@ -188,7 +188,7 @@
 	// is not a struct, or keyField or valueField do not exist in T, this function will panic.
 	func MapBy2[A comparable, B any, T any](keyField, valueField string, items []T) map[A]B {
 		return sliceToMap(items, func(item T) (A, B) {
-			v := reflect.ValueOf(item)
+			v := reflect.ValueOf(item).Elem()
 			keyFieldValue := v.FieldByName(keyField)
 			valueFieldValue := v.FieldByName(valueField)
 			return convertValue[A](keyFieldValue),

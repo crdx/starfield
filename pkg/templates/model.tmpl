@@ -38,16 +38,16 @@
 
 	{{ if $hasID }}
 		// Find{{ $name }} finds an instance of {{ $name }} by ID.
-		func Find{{ $name }}[T Integer | ~string](id T) ({{ $name }}, bool) {
+		func Find{{ $name }}[T Integer | ~string](id T) (*{{ $name }}, bool) {
 			row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where id = ?{{ if $hasDeletedAt }} and deleted_at is null{{ end }}", id)
-			var item {{ $name }}
+			item := new({{ $name }})
 			err := row.Scan(
 				{{- range $fields }}
 					&item.{{ .Name }},
 				{{- end }}
 			)
 			if err == sql.ErrNoRows {
-				return item, false
+				return nil, false
 			}
 			if err != nil {
 				handleError(err)
@@ -57,15 +57,15 @@
 	{{ end }}
 
 	// Find{{ $name }}s finds all non-deleted instances of {{ $name }}.
-	func Find{{ $name }}s() []{{ $name }} {
+	func Find{{ $name }}s() []*{{ $name }} {
 		rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}`{{ if $hasDeletedAt }} where deleted_at is null{{ end }} order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 		if err != nil {
 			handleError(err)
 		}
 		defer rows.Close()
-		items := []{{ $name }}{}
+		var items []*{{ $name }}
 		for rows.Next() {
-			var item {{ $name }}
+			item := new({{ $name }})
 			if err := rows.Scan(
 				{{- range $fields }}
 					&item.{{ .Name }},
@@ -88,22 +88,22 @@
 		// Reload reloads this instance of {{ $name }}.
 		func (self *{{ $name }}) Reload() {
 			if s, found := Find{{ $name }}(self.ID); found {
-				*self = s
+				*self = *s
 			}
 		}
 	{{ end }}
 
 	{{ if $hasDeletedAt }}
 		// Find{{ $name }}sUnscoped finds all instances (including deleted) of {{ $name }}.
-		func Find{{ $name }}sUnscoped() []{{ $name }} {
+		func Find{{ $name }}sUnscoped() []*{{ $name }} {
 			rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}` order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 			if err != nil {
 				handleError(err)
 			}
 			defer rows.Close()
-			items := []{{ $name }}{}
+			var items []*{{ $name }}
 			for rows.Next() {
-				var item {{ $name }}
+				item := new({{ $name }})
 				if err := rows.Scan(
 					{{- range $fields }}
 						&item.{{ .Name }},
@@ -167,7 +167,7 @@
 	{{ range $fields }}
 		{{ if and (ne .Name "ID") (ne .Name "DeletedAt") (ne .Name "CreatedAt") }}
 			// Find{{ $name }}sBy{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}, sorted by ID ASC.
-			func Find{{ $name }}sBy{{ .Name }}(value {{ .Type }}) []{{ $name }} {
+			func Find{{ $name }}sBy{{ .Name }}(value {{ .Type }}) []*{{ $name }} {
 				var rows *sql.Rows
 				var err error
 				{{- if .Nullable }}
@@ -183,9 +183,9 @@
 					handleError(err)
 				}
 				defer rows.Close()
-				items := []{{ $name }}{}
+				var items []*{{ $name }}
 				for rows.Next() {
-					var item {{ $name }}
+					item := new({{ $name }})
 					if err := rows.Scan(
 						{{- range $fields }}
 							&item.{{ .Name }},
@@ -206,7 +206,7 @@
 
 			{{ if $hasDeletedAt }}
 				// Find{{ $name }}sBy{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}, sorted by ID ASC.
-				func Find{{ $name }}sBy{{ .Name }}Unscoped(value {{ .Type }}) []{{ $name }} {
+				func Find{{ $name }}sBy{{ .Name }}Unscoped(value {{ .Type }}) []*{{ $name }} {
 					var rows *sql.Rows
 					var err error
 					{{- if .Nullable }}
@@ -222,9 +222,9 @@
 						handleError(err)
 					}
 					defer rows.Close()
-					items := []{{ $name }}{}
+					var items []*{{ $name }}
 					for rows.Next() {
-						var item {{ $name }}
+						item := new({{ $name }})
 						if err := rows.Scan(
 							{{- range $fields }}
 								&item.{{ .Name }},
@@ -245,9 +245,9 @@
 			{{ end }}
 
 			// Find{{ $name }}By{{ .Name }} finds an instance of {{ $name }} by {{ .Name }}.
-			func Find{{ $name }}By{{ .Name }}(value {{ .BaseType }}) ({{ $name }}, bool) {
+			func Find{{ $name }}By{{ .Name }}(value {{ .BaseType }}) (*{{ $name }}, bool) {
 				row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ?{{ if $hasDeletedAt }} AND deleted_at IS NULL{{ end }}", value)
-				var item {{ $name }}
+				item := new({{ $name }})
 				err := row.Scan(
 					{{- range $fields }}
 						&item.{{ .Name }},

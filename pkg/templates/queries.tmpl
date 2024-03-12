@@ -27,7 +27,7 @@
 				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 					{{- template "exec" . }}
 					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
-						var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+						var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
 					{{- end }}
 					err := row.Scan({{ .ReturnValue.Scan }})
 					if err == sql.ErrNoRows {
@@ -39,14 +39,18 @@
 					return {{ .ReturnValue.ReturnName }}
 				}
 			{{ else }}
-				func {{ .MethodName }}({{ .Argument.Pair }}) ({{ .ReturnValue.DefineType }}, bool) {
+				func {{ .MethodName }}({{ .Argument.Pair }}) ({{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}, bool) {
 					{{- template "exec" . }}
 					{{- if or (ne .Argument.Pair .ReturnValue.Pair) (ne .Argument.DefineType .ReturnValue.DefineType) }}
-						var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+						{{- if .ReturnValue.Pointer }}
+							{{ .ReturnValue.ReturnName }} := new({{ .ReturnValue.Type }})
+						{{ else }}
+							var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
+						{{- end }}
 					{{- end }}
 					err := row.Scan({{ .ReturnValue.Scan }})
 					if err == sql.ErrNoRows {
-						return item, false
+						return {{ .ReturnValue.ReturnName }}, false
 					}
 					if err != nil {
 						handleError(err)
@@ -58,15 +62,19 @@
 
 		{{ if eq .Command ":many" }}
 			{{ template "comments" .Comments -}}
-			func {{ .MethodName }}({{ .Argument.Pair }}) ([]{{ .ReturnValue.DefineType }}) {
+			func {{ .MethodName }}({{ .Argument.Pair }}) ([]{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}) {
 				{{- template "exec" . }}
 				if err != nil {
 					handleError(err)
 				}
 				defer rows.Close()
-				items := []{{ .ReturnValue.DefineType }}{}
+				var items []{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}
 				for rows.Next() {
-					var {{ .ReturnValue.Name }} {{ .ReturnValue.Type }}
+					{{- if .ReturnValue.Pointer }}
+						{{ .ReturnValue.ReturnName }} := new({{ .ReturnValue.Type }})
+					{{ else }}
+						var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
+					{{- end }}
 					if err := rows.Scan({{ .ReturnValue.Scan }}); err != nil {
 						handleError(err)
 					}

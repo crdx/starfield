@@ -32,6 +32,7 @@ type QueryValue struct {
 	Struct       *Struct
 	Typ          string
 	Column       *plugin.Column
+	Pointer      bool
 }
 
 type Argument struct {
@@ -262,6 +263,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 				EmitAsStruct: emitAsStruct,
 				Name:         "item",
 				Struct:       gs,
+				Pointer:      true,
 			}
 		}
 
