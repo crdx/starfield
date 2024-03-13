@@ -38,7 +38,7 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 				tableName = schema.Name + "_" + table.Rel.Name
 			}
 
-			structName := toSingular(tableName, options.PreserveTables)
+			structName := toSingular(tableName, options.Preserve)
 			s := Struct{
 				Table:   &plugin.Identifier{Schema: schema.Name, Name: table.Rel.Name},
 				Name:    getIdentifierName(structName, options),

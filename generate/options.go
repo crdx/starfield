@@ -10,11 +10,11 @@ import (
 )
 
 type Options struct {
-	Out            string            `json:"out" yaml:"out"`
-	Package        string            `json:"package" yaml:"package"`
-	Rename         map[string]string `json:"rename,omitempty" yaml:"rename"`
-	PreserveTables []string          `json:"preserve_tables,omitempty" yaml:"preserve_tables"`
-	MaxParams      mo.Option[int]    `json:"max_params,omitempty" yaml:"max_params"`
+	Out       string            `json:"out" yaml:"out"`
+	Package   string            `json:"package" yaml:"package"`
+	Rename    map[string]string `json:"rename,omitempty" yaml:"rename"`
+	Preserve  []string          `json:"preserve,omitempty" yaml:"preserve"`
+	MaxParams mo.Option[int]    `json:"max_params,omitempty" yaml:"max_params"`
 }
 
 func parseOptions(req *plugin.GenerateRequest) (*Options, error) {

@@ -10,7 +10,7 @@ sql:
         options:
           package: db
           max_params: 3
-          # preserve_tables:
+          # preserve:
           #   - foo_data # not "datum"
           # rename:
           #   url: URL
