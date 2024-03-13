@@ -1,4 +1,4 @@
-set quiet
+set quiet := true
 
 [private]
 help:
