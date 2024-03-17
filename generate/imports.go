@@ -49,6 +49,8 @@ func (self *Importer) mainImports() FileImports {
 	std["regexp"] = true
 	std["strings"] = true
 	std["time"] = true
+	std["runtime"] = true
+	std["path/filepath"] = true
 
 	return sortImports(std, pkg)
 }
