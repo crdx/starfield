@@ -15,7 +15,7 @@
 	func logQuery(s string, d time.Duration) {
 		file, line := getCaller(5)
 		link := hyperlink(fmt.Sprintf("%s#%d", file, line), fmt.Sprintf("%s:%d", filepath.Base(file), line))
-		log.Printf("[\033[33m%3dms\033[0m] [\033[36m%s\033[0m] %s", d.Truncate(time.Millisecond).Milliseconds(), link, s)
+		log.Printf("[\033[33m%3dms\033[0m] \033[36m%s\033[0m %s", d.Truncate(time.Millisecond).Milliseconds(), link, s)
 	}
 
 	func formatQuery(query string, args ...any) string {
