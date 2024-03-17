@@ -183,7 +183,7 @@
 
 	{{ range $fields }}
 		{{ if and (ne .Name "ID") (ne .Name "DeletedAt") (ne .Name "CreatedAt") }}
-			// Find{{ $name }}sBy{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}, sorted by ID ASC.
+			// Find{{ $name }}sBy{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}.
 			func Find{{ $name }}sBy{{ .Name }}(value {{ .Type }}) []*{{ $name }} {
 				var rows *sql.Rows
 				var err error
@@ -226,7 +226,7 @@
 			}
 
 			{{ if $hasDeletedAt }}
-				// Find{{ $name }}sBy{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}, sorted by ID ASC.
+				// Find{{ $name }}sBy{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}.
 				func Find{{ $name }}sBy{{ .Name }}Unscoped(value {{ .Type }}) []*{{ $name }} {
 					var rows *sql.Rows
 					var err error
