@@ -4,8 +4,8 @@
 	// returns an error. All subsequent database calls will take place within this transaction,
 	// so this is NOT thread-safe.
 	func BeginTransaction() error {
-		if previousConnection == nil {
-			previousConnection = connection
+		if oldConnection == nil {
+			oldConnection = connection
 			var err error
 			connection, err = connection.(*sql.DB).Begin()
 			if err != nil {
@@ -17,12 +17,12 @@
 
 	// CommitTransaction commits the current transaction, if any.
 	func CommitTransaction() error {
-		if previousConnection == nil {
+		if oldConnection == nil {
 			return errors.New("no transaction")
 		}
 		err := connection.(*sql.Tx).Commit()
-		connection = previousConnection
-		previousConnection = nil
+		connection = oldConnection
+		oldConnection = nil
 		if err != nil {
 			return err
 		}
@@ -31,12 +31,12 @@
 
 	// RollbackTransaction rolls back the current transaction, if any.
 	func RollbackTransaction() error {
-		if previousConnection == nil {
+		if oldConnection == nil {
 			return errors.New("no transaction")
 		}
 		err := connection.(*sql.Tx).Rollback()
-		connection = previousConnection
-		previousConnection = nil
+		connection = oldConnection
+		oldConnection = nil
 		return err
 	}
 {{ end }}
