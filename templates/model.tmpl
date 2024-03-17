@@ -301,7 +301,7 @@
 						handleError(err)
 						return false
 					}
-					{{ if .Nullable }}
+					{{- if .Nullable }}
 						self.{{ .Name }} = sql.Null[{{ .BaseType }}]{V: value, Valid: true}
 					{{ else }}
 						self.{{ .Name }} = value
