@@ -122,6 +122,20 @@
 		}
 	}
 
+	func getStructFields(v any) []any {
+		value := reflect.ValueOf(v).Elem()
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+
+		fields := make([]any, value.NumField())
+		for i := 0; i < value.NumField(); i++ {
+			fields[i] = value.Field(i).Addr().Interface()
+		}
+
+		return fields
+	}
+
 	func getCaller(level int) (string, int) {
 		_, file, line, ok := runtime.Caller(level)
 		if !ok {

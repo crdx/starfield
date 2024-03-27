@@ -113,6 +113,43 @@
 		return connection.QueryRow(query, args...)
 	}
 
+	func Scan1[T any](query string, args ...any) *T {
+		items := ScanN[T](query, args...)
+		if len(items) == 0 {
+			return nil
+		}
+		return items[0]
+	}
+
+	func ScanN[T any](query string, args ...any) []*T {
+		rows, err := Query(query, args...)
+		if err != nil {
+			handleError(err)
+			return nil
+		}
+
+		defer rows.Close()
+
+		var items []*T
+		for rows.Next() {
+			item := new(T)
+
+			if err := rows.Scan(getStructFields(item)...); err != nil {
+				handleError(err)
+				return nil
+			}
+
+			items = append(items, item)
+		}
+
+		if err := rows.Err(); err != nil {
+			handleError(err)
+			return nil
+		}
+
+		return items
+	}
+
 	// NSlice converts a []T into a []sql.Null[T], effectively wrapping each slice element in
 	// sql.Null[T].
 	func NSlice[T any](v []T) []sql.Null[T] {
