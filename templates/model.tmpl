@@ -39,9 +39,28 @@
 	}
 
 	{{ if $hasID }}
-		// Find{{ $name }} finds an instance of {{ $name }} by ID.
+		// Find{{ $name }} finds a non-deleted instance of {{ $name }} by ID.
 		func Find{{ $name }}[T Integer | ~string](id T) (*{{ $name }}, bool) {
 			row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where id = ?{{ if $hasDeletedAt }} and deleted_at is null{{ end }}", id)
+			item := new({{ $name }})
+			err := row.Scan(
+				{{- range $fields }}
+					&item.{{ .Name }},
+				{{- end }}
+			)
+			if err == sql.ErrNoRows {
+				return nil, false
+			}
+			if err != nil {
+				handleError(err)
+				return nil, false
+			}
+			return item, true
+		}
+
+		// Find{{ $name }} finds an instance (including deleted) of {{ $name }} by ID.
+		func Find{{ $name }}Unscoped[T Integer | ~string](id T) (*{{ $name }}, bool) {
+			row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where id = ?", id)
 			item := new({{ $name }})
 			err := row.Scan(
 				{{- range $fields }}
