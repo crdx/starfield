@@ -23,9 +23,9 @@ For a model `M` and a column `C`:
 
 For an instance of model `M`:
 
-- `Delete() bool` sets the `deleted_at` column to the current timestamp.
-- `Restore() bool` sets the `deleted_at` column to `NULL`.
-- `HardDelete() bool` deletes the row from the database.
+- `Delete() bool` sets the `deleted_at` column to the current timestamp, and returns whether any rows were affected.
+- `Restore() bool` sets the `deleted_at` column to `NULL`, and returns whether any rows were affected.
+- `HardDelete() bool` deletes the row from the database, and whether it existed.
 - `Reload()` fetches the latest values from the database.
 
 For an instance of `M` and a column `C`:
