@@ -8,18 +8,18 @@ The main difference between this version and its ancestor is that for each model
 
 For a model `M`:
 
-- `CreateM(value *M) *M` creates a new `M` and returns itself with the last insert ID populated.
-- `FindM[T](id T) (*M, bool)` returns the non-deleted `M` with the specified ID, and whether it was found.
-- `FindMUnscoped[T](id T) (*M, bool)` returns the `M` with the specified ID, and whether it was found.
+- `CreateM(value) *M` creates a new `M` and returns itself with the last insert ID populated.
+- `FindM(id) (*M, bool)` returns the non-deleted `M` with the specified ID, and whether it was found.
+- `FindMUnscoped(id) (*M, bool)` returns the `M` with the specified ID, and whether it was found.
 - `FindMs() []*M` returns all non-deleted `M`s in the database.
 - `FindMsUnscoped() []*M` returns all `M`s in the database.
 
 For a model `M` and a column `C`:
 
-- `FindMsByC[T](value T) []*M` finds all non-deleted `M`s with column `C` matching `value`.
-- `FindMsByCUnscoped[T](value T) []*M` finds all `M`s with column `C` matching `value`.
-- `FindMByC[T](value T) (*M, bool)` finds the non-deleted `M` with column `C` matching `value`, and whether it was found.
-- `FindMByCUnscoped[T](value T) (*M, bool)` finds the `M` with column `C` matching `value`, and whether it was found.
+- `FindMsByC(value) []*M` finds all non-deleted `M`s with column `C` matching `value`.
+- `FindMsByCUnscoped(value) []*M` finds all `M`s with column `C` matching `value`.
+- `FindMByC(value) (*M, bool)` finds the non-deleted `M` with column `C` matching `value`, and whether it was found.
+- `FindMByCUnscoped(value) (*M, bool)` finds the `M` with column `C` matching `value`, and whether it was found.
 
 For an instance of model `M`:
 
@@ -30,7 +30,7 @@ For an instance of model `M`:
 
 For an instance of `M` and a column `C`:
 
-- `UpdateC[T](value T) bool` sets the value of column `C` to `value`.
+- `UpdateC(value) bool` sets the value of column `C` to `value`.
 - `ClearC() bool` sets the value of column `C` to `NULL`.
 
 Helper methods for operations that are irrelevant for the type in question are not generated. For example, `Unscoped` variants won't be generated for models without a `deleted_at` column.
