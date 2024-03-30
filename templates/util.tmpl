@@ -28,7 +28,7 @@
 				} else {
 					s = "0"
 				}
-			case int64, float64:
+			case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, uintptr, float32, float64:
 				s = fmt.Sprintf("%v", a)
 			case sql.Null[time.Time]:
 				if a.Valid {
