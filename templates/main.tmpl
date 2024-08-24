@@ -165,6 +165,16 @@
 		return sql.Null[T]{V: v, Valid: true}
 	}
 
+	// N2Native converts a sql.Null[T] into a *T. A null instance of sql.Null[T] is mapped to nil
+	// for *T.
+	func N2Native[T any](v sql.Null[T]) *T {
+		if v.Valid {
+			return &v.V
+		} else {
+			return nil
+		}
+	}
+
 	// NTime parses a string into a valid sql.Null[time.Time]. If it cannot be parsed, it returns a null
 	// instance of sql.Null[time.Time].
 	func NTime(s string, layout string) sql.Null[time.Time] {
