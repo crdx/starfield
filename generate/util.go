@@ -36,7 +36,7 @@ func toCamelCase(s string) string {
 		if part == "id" {
 			out += "ID"
 		} else {
-			out += strings.Title(part)
+			out += strings.Title(part) //nolint
 		}
 	}
 	return out
@@ -65,15 +65,15 @@ func hasPrefixIgnoringSliceAndPointerPrefix(s string, prefix string) bool {
 	return strings.HasPrefix(trimmedS, trimmedPrefix)
 }
 
-func log(obj ...any) {
+func log(obj ...any) { //nolint
 	logS(spew.Sdump(obj...))
 }
 
-func logF(str string, args ...any) {
+func logF(str string, args ...any) { //nolint
 	logS(fmt.Sprintf(str, args...))
 }
 
-func logS(str string) {
+func logS(str string) { //nolint
 	file := lo.Must(os.OpenFile("/tmp/starlog", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666))
 	defer file.Close()
 	lo.Must(file.WriteString(str + "\n"))
@@ -97,31 +97,6 @@ func isReserved(s string) bool {
 		"var",
 	}
 	return slices.Contains(keywords, s)
-}
-
-func getParamName(plugin *plugin.Parameter) string {
-	if plugin.Column.Name != "" {
-		return getArgName(plugin.Column.Name)
-	}
-	return fmt.Sprintf("dollar_%d", plugin.Number)
-}
-
-func getArgName(arg string) string {
-	if !strings.Contains(arg, "_") {
-		return arg
-	}
-
-	name := ""
-	for i, p := range strings.Split(arg, "_") {
-		if i == 0 {
-			name += strings.ToLower(p)
-		} else if p == "id" {
-			name += "ID"
-		} else {
-			name += strings.Title(p)
-		}
-	}
-	return name
 }
 
 // fillSlice fills a slice with n instances of s.
@@ -177,7 +152,7 @@ func getIdentifierName(name string, options *Options) string {
 		if p == "id" {
 			out += "ID"
 		} else {
-			out += strings.Title(p)
+			out += strings.Title(p) //nolint
 		}
 	}
 

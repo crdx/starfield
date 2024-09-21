@@ -79,9 +79,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 
 	var imports []string
 	for _, importSpecs := range mergeImports(importer.mainImports(), importer.queryImports()) {
-		for _, importSpec := range importSpecs {
-			imports = append(imports, importSpec)
-		}
+		imports = append(imports, importSpecs...)
 	}
 
 	imports = lo.Uniq(imports)
