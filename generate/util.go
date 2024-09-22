@@ -12,6 +12,8 @@ import (
 	"github.com/jinzhu/inflection"
 	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func formatTags(tags map[string]string) string {
@@ -36,7 +38,7 @@ func toCamelCase(s string) string {
 		if part == "id" {
 			out += "ID"
 		} else {
-			out += strings.Title(part) //nolint
+			out += cases.Title(language.English).String(part)
 		}
 	}
 	return out
@@ -152,7 +154,7 @@ func getIdentifierName(name string, options *Options) string {
 		if p == "id" {
 			out += "ID"
 		} else {
-			out += strings.Title(p) //nolint
+			out += cases.Title(language.English).String(p)
 		}
 	}
 
