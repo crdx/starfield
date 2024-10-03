@@ -51,6 +51,9 @@ func toLowerCase(s string) string {
 	if s == "ID" {
 		return "id"
 	}
+	if s == "UUID" {
+		return "uuid"
+	}
 
 	return strings.ToLower(s[:1]) + s[1:]
 }
