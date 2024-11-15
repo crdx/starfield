@@ -7,6 +7,41 @@
 	{{ $hasID := .HasID }}
 	{{ $fields := .Fields }}
 
+	// Get{{ $name }}TableStatus returns the TableStatus for the {{ $name }}s table.
+	func Get{{ $name }}TableStatus() (TableStatus, error) {
+	    row := QueryRow(`SHOW TABLE STATUS LIKE {{ printf "%q" $table.Name }}`)
+
+	    var status TableStatus
+	    err := row.Scan(
+	        &status.Name,
+	        &status.Engine,
+	        &status.Version,
+	        &status.RowFormat,
+	        &status.Rows,
+	        &status.AvgRowLength,
+	        &status.DataLength,
+	        &status.MaxDataLength,
+	        &status.IndexLength,
+	        &status.DataFree,
+	        &status.AutoIncrement,
+	        &status.CreateTime,
+	        &status.UpdateTime,
+	        &status.CheckTime,
+	        &status.Collation,
+	        &status.Checksum,
+	        &status.CreateOptions,
+	        &status.Comment,
+	        &status.MaxIndexLength,
+	        &status.Temporary,
+	    )
+
+	    if err != nil {
+	        return TableStatus{}, err
+	    }
+
+	    return status, nil
+	}
+
 	// Create{{ $name }} creates a new instance of {{ $name }}.
 	func Create{{ $name }}(value *{{ $name }}) *{{ $name }} {
 		{{- if $hasCreatedAt -}}

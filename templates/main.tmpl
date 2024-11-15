@@ -243,6 +243,29 @@
 		})
 	}
 
+	type TableStatus struct {
+	    Name           string
+	    Engine         string
+	    Version        int
+	    RowFormat      string
+	    Rows           int
+	    AvgRowLength   int
+	    DataLength     int64
+	    MaxDataLength  int64
+	    IndexLength    int64
+	    DataFree       int64
+	    AutoIncrement  int
+	    CreateTime     string
+	    UpdateTime     *string
+	    CheckTime      *string
+	    Collation      string
+	    Checksum       *string
+	    CreateOptions  string
+	    Comment        string
+	    MaxIndexLength int64
+	    Temporary      string
+	}
+
 	{{ template "migrate" . }}
 	{{ template "transaction" . }}
 	{{ template "create" . }}
