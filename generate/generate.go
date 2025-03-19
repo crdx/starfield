@@ -56,6 +56,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 		"escape":         sdk.EscapeBacktick,
 		"getMethod":      getMethod,
 		"getReturnValue": getReturnValue,
+		"oneline":        oneline,
 	}
 
 	templateEngine := template.Must(

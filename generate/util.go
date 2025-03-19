@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"slices"
 	"strings"
 	"unicode"
@@ -167,4 +168,8 @@ func getIdentifierName(name string, options *Options) string {
 	} else {
 		return out
 	}
+}
+
+func oneline(s string) string {
+	return regexp.MustCompile(`\s+`).ReplaceAllString(s, " ")
 }

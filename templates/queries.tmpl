@@ -23,6 +23,8 @@
 
 		{{ if eq .Command ":one" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			{{ if and (eq .ReturnValue.Name "count") (eq .ReturnValue.Typ "int64") }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 					{{- template "exec" . }}
@@ -60,6 +62,8 @@
 
 		{{ if eq .Command ":many" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) ([]{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}) {
 				{{- template "exec" . }}
 				if err != nil {
@@ -94,6 +98,8 @@
 
 		{{ if eq .Command ":exec" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) {
 				{{- template "exec" . }}
 				if err != nil {
@@ -104,6 +110,8 @@
 
 		{{ if eq .Command ":execrows" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
 				if err != nil {
@@ -121,6 +129,8 @@
 
 		{{ if eq .Command ":execlastid" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
 				if err != nil {
@@ -138,6 +148,8 @@
 
 		{{ if eq .Command ":execresult" }}
 			{{ template "comments" .Comments -}}
+			{{ if .Comments }}//{{ end }}
+			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) sql.Result {
 				{{- template "exec" . }}
 				if err != nil {
