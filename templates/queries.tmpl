@@ -2,7 +2,7 @@
 	{{ range .Queries }}
 		// {{ .Command }}
 		const {{ .ConstantName }} = `
-{{escape .SQL }}
+{{ escape .SQL }}
 `
 
 		{{ if .Argument.EmitStruct }}
