@@ -76,7 +76,7 @@ plugins:
 
 See the template [sqlc.yml](https://github.com/crdx/starfield/blob/main/scaffold/sqlc.yml) for an example of how to use the plugin. Alternatively, use the `starfield init` command to create a basic project structure in the current directory.
 
-Next, call the `Init` function from the generated package (which is `db` by default) to set up the database connection. For documentation of each member below refer to the package documentation.
+Next, call the `Init` function from the generated package (which is `db` by default) to set up the database connection. For documentation on each member below refer to the package documentation.
 
 ```go
 db.Init(&db.Config{
