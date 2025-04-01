@@ -113,6 +113,7 @@
 		return connection.QueryRow(query, args...)
 	}
 
+	// Scan1 scans one row into *T.
 	func Scan1[T any](query string, args ...any) *T {
 		items := ScanN[T](query, args...)
 		if len(items) == 0 {
@@ -121,6 +122,7 @@
 		return items[0]
 	}
 
+	// ScanN scans N rows into []*T.
 	func ScanN[T any](query string, args ...any) []*T {
 		rows, err := Query(query, args...)
 		if err != nil {
@@ -209,6 +211,7 @@
 		return time.Time{}, false
 	}
 
+	// Pluck extracts a slice of a single field from a slice of structs.
 	func Pluck[T any, U any](items []U, field string) []T {
 		var values []T
 		for _, item := range items {

@@ -34,9 +34,22 @@ For an instance of `M` and a column `C`:
 - `UpdateC(value) bool` sets the value of column `C` to `value`.
 - `ClearC() bool` sets the value of column `C` to `NULL`.
 
-Helper methods for operations that are irrelevant for the type in question are not generated. For example, `Unscoped` variants won't be generated for models without a `deleted_at` column.
+Helper methods for operations that are irrelevant for the type in question are not generated. For example, `Unscoped` variants won't be generated for models without a `deleted_at` column, and `ClearX` will only be generated for nullable columns.
 
-## Installation
+## More features
+
+Aside from the model-specific methods above, a number of more general helper methods are also available.
+
+You can check out the package-level documentation for the specifics, but here is a quick overview, grouped by category.
+
+- `Query`, `Exec`, and `QueryRow` query the database using raw SQL and return raw interfaces from `database/sql`.
+- `Scan1` and `ScanN` query the database using raw SQL and scan the result(s) into a struct `T` or `[]T`, respectively.
+- `NSlice`, `N`, and `N2Native` convert values between `T` and `sql.Null[T]`.
+- `NTime`, `Now`, `ToTime` simplify operations on time.
+- `Pluck`, `MapByID`, `MapBy`, `MapBy2` extract values out of structs into different datatypes like maps and slices.
+- `BeginTransaction`, `CommitTransaction`, `RollbackTransaction` handle database transactions.
+
+## Usage
 
 There are two ways to use sqlc plugins: as a standard binary or a sandboxed wasm binary. For security, wasm binaries are recommended when running untrusted plugins, however, a significant performance penalty is incurred in this case. As this repository is a mere ~1100 lines of code it's recommended to vet the code and then use the faster, process-based method.
 
