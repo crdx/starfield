@@ -8,7 +8,8 @@ The main difference between this version and its ancestor is that for each model
 
 For a model `M`:
 
-- `CreateM(value) *M` creates a new `M` and returns itself with the last insert ID populated.
+- `GetMTableStatus() (TableStatus, error)` returns an instance of `TableStatus` with information about the table.
+- `CreateM(value) *M` creates a new `M` and returns itself with the last insert ID that was populated.
 - `FindM(id) (*M, bool)` returns the non-deleted `M` with the specified ID, and whether it was found.
 - `FindMUnscoped(id) (*M, bool)` returns the `M` with the specified ID, and whether it was found.
 - `FindMs() []*M` returns all non-deleted `M`s in the database.
