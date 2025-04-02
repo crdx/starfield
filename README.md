@@ -53,7 +53,7 @@ You can check out the package-level documentation for the specifics, but here is
 - `Pluck`, `MapByID`, `MapBy`, `MapBy2` extract values out of structs into different datatypes like maps and slices.
 - `BeginTransaction`, `CommitTransaction`, `RollbackTransaction` handle database transactions.
 
-## Usage
+## Installation
 
 There are two ways to use sqlc plugins: as a standard binary or a sandboxed wasm binary. For security, wasm binaries are recommended when running untrusted plugins, however, a significant performance penalty is incurred in this case. As this repository is a mere ~1100 lines of code it's recommended to vet the code and then use the faster, process-based method.
 
