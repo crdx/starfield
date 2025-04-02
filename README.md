@@ -8,7 +8,7 @@ Read the [introductory post](https://textplain.org/starfield).
 
 ## Features
 
-The main difference between this version and its ancestor is that for each model a set of helper methods for common operations is generated, avoiding the need to define specific queries for them.
+Compared to `sqlc-gen-go` the most notable change is the generation of a set of lookup and CRUD methods for each table in the schema. These are available without the need to define any queries yourself.
 
 For a model `M`:
 
