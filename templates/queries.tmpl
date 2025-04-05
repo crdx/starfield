@@ -22,8 +22,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":one" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			{{ if and (eq .ReturnValue.Name "count") (eq .ReturnValue.Typ "int64") }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
@@ -61,8 +62,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":many" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) ([]{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}) {
 				{{- template "exec" . }}
@@ -97,8 +99,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":exec" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) {
 				{{- template "exec" . }}
@@ -109,8 +112,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":execrows" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
@@ -128,8 +132,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":execlastid" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 				{{- template "exec" . }}
@@ -147,8 +152,9 @@
 		{{ end }}
 
 		{{ if eq .Command ":execresult" }}
-			{{ template "comments" .Comments -}}
-			{{ if .Comments }}//{{ end }}
+			// {{ .MethodName }} runs an SQL query.
+			{{- template "comments" .Comments -}}
+			//
 			{{ comment (oneline .SQL) }}
 			func {{ .MethodName }}({{ .Argument.Pair }}) sql.Result {
 				{{- template "exec" . }}
