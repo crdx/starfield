@@ -61,19 +61,6 @@
 		return query
 	}
 
-	func listFileNames(dir string) []string {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return nil
-		}
-
-		var names []string
-		for _, entry := range entries {
-			names = append(names, entry.Name())
-		}
-		return names
-	}
-
 	func handleError(err error) {
 		if config.ErrorHandler != nil {
 			config.ErrorHandler(err)

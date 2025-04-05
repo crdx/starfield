@@ -44,7 +44,6 @@ func (self *Importer) mainImports() FileImports {
 	std["fmt"] = true
 	std["log"] = true
 	std["net/url"] = true
-	std["os"] = true
 	std["reflect"] = true
 	std["regexp"] = true
 	std["strings"] = true
