@@ -71,15 +71,15 @@ func hasPrefixIgnoringSliceAndPointerPrefix(s string, prefix string) bool {
 	return strings.HasPrefix(trimmedS, trimmedPrefix)
 }
 
-func log(obj ...any) { //nolint
+func log(obj ...any) { //nolint:unused
 	logS(spew.Sdump(obj...))
 }
 
-func logF(str string, args ...any) { //nolint
+func logF(str string, args ...any) { //nolint:unused
 	logS(fmt.Sprintf(str, args...))
 }
 
-func logS(str string) { //nolint
+func logS(str string) { //nolint:unused
 	file := lo.Must(os.OpenFile("/tmp/starlog", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666))
 	defer file.Close()
 	lo.Must(file.WriteString(str + "\n"))
