@@ -120,7 +120,7 @@
 			handleError(err)
 			return nil
 		}
-		defer rows.Close()
+		defer rows.Close() //nolint:errcheck
 		var items []*{{ $name }}
 		for rows.Next() {
 			item := new({{ $name }})
@@ -162,7 +162,7 @@
 				handleError(err)
 				return nil
 			}
-			defer rows.Close()
+			defer rows.Close() //nolint:errcheck
 			var items []*{{ $name }}
 			for rows.Next() {
 				item := new({{ $name }})
@@ -254,7 +254,7 @@
 					handleError(err)
 					return nil
 				}
-				defer rows.Close()
+				defer rows.Close() //nolint:errcheck
 				var items []*{{ $name }}
 				for rows.Next() {
 					item := new({{ $name }})
@@ -297,7 +297,7 @@
 						handleError(err)
 						return nil
 					}
-					defer rows.Close()
+					defer rows.Close() //nolint:errcheck
 					var items []*{{ $name }}
 					for rows.Next() {
 						item := new({{ $name }})

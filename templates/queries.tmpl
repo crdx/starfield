@@ -72,7 +72,7 @@
 					handleError(err)
 					return nil
 				}
-				defer rows.Close()
+				defer rows.Close() //nolint:errcheck
 				var items []{{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}
 				for rows.Next() {
 					{{- if .ReturnValue.Pointer }}

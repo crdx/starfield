@@ -10,7 +10,7 @@
 		if err != nil {
 			return err
 		}
-		defer connection.Close()
+		defer connection.Close() //nolint:errcheck
 
 		_, err = connection.Exec(`
 			create table if not exists migrations (
