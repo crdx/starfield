@@ -93,7 +93,7 @@
 			return item, true
 		}
 
-		// Find{{ $name }} finds an instance (including deleted) of {{ $name }} by ID.
+		// Find{{ $name }}Unscoped finds an instance (including deleted) of {{ $name }} by ID.
 		func Find{{ $name }}Unscoped[T Integer | ~string](id T) (*{{ $name }}, bool) {
 			row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where id = ?", id)
 			item := new({{ $name }})

@@ -30,7 +30,7 @@
 		Seed         func()       // Database seeder which only runs if the database is freshly created.
 	}
 
-	// Initialise the database.
+	// Init sets up the database.
 	func Init(c *Config) error {
 		config = c
 		return doInit()
