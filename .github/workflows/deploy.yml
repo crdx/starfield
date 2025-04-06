@@ -11,43 +11,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
-        uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Build binary
         run: |
           GOOS=wasip1 GOARCH=wasm go build -o starfield.wasm ./cmd/starfield
           CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o starfield ./cmd/starfield
 
-      - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create draft release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: ''
           draft: true
-          prerelease: false
-
-      - name: Upload wasm package to GitHub release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/starfield.wasm
-          asset_name: starfield.wasm
-          asset_content_type: application/wasm
-
-      - name: Upload elf package to GitHub release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/starfield
-          asset_name: starfield
-          asset_content_type: application/x-executable
-
+          files: |
+            ${{ github.workspace }}/starfield.wasm
+            ${{ github.workspace }}/starfield
