@@ -81,7 +81,7 @@ func logF(str string, args ...any) { //nolint:unused
 
 func logS(str string) { //nolint:unused
 	file := lo.Must(os.OpenFile("/tmp/starlog", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666))
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 	lo.Must(file.WriteString(str + "\n"))
 }
 

@@ -134,7 +134,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 	response := plugin.GenerateResponse{}
 	response.Files = append(response.Files, &plugin.File{
 		Name:     "db.gen.go",
-		Contents: []byte(code),
+		Contents: code,
 	})
 
 	return &response, nil
