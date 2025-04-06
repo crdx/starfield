@@ -1,6 +1,6 @@
 module crdx.org/starfield
 
-go 1.22.0
+go 1.24
 
 require (
 	crdx.org/col v1.1.1
