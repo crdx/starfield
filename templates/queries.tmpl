@@ -22,11 +22,11 @@
 		{{ end }}
 
 		{{ if eq .Command ":one" }}
-			// {{ .MethodName }} runs an SQL query.
-			{{- template "comments" .Comments -}}
-			//
-			{{ comment (oneline .SQL) }}
 			{{ if and (eq .ReturnValue.Name "count") (eq .ReturnValue.Typ "int64") }}
+				// {{ .MethodName }} runs an SQL query.
+				{{- template "comments" .Comments -}}
+				//
+				{{ comment (oneline .SQL) }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) int64 {
 					{{- template "exec" . }}
 					var {{ .ReturnValue.ReturnName }} {{ .ReturnValue.Type }}
@@ -41,6 +41,10 @@
 					return {{ .ReturnValue.ReturnName }}
 				}
 			{{ else }}
+				// {{ .MethodName }} runs an SQL query.
+				{{- template "comments" .Comments -}}
+				//
+				{{ comment (oneline .SQL) }}
 				func {{ .MethodName }}({{ .Argument.Pair }}) ({{ if .ReturnValue.Pointer }}*{{ end }}{{ .ReturnValue.DefineType }}, bool) {
 					{{- template "exec" . }}
 					{{- if .ReturnValue.Pointer }}
