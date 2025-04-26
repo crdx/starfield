@@ -36,7 +36,7 @@ func doInit() {
 	query := "foos.sql"
 	queryPath := path.Join(queriesDir, query)
 
-	if pathExists(sqlc) {
+	if readable(sqlc) {
 		log.Printf(col.Yellow("skip %s"), sqlc)
 	} else {
 		log.Printf(col.Green("write %s"), sqlc)
@@ -51,13 +51,13 @@ func doInit() {
 		log.Printf(col.Red("mkdir %s: %s"), migrationsDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), migrationsDir)
-		if pathExists(schemaPath) {
+		if readable(schemaPath) {
 			log.Printf(col.Yellow("skip %s"), schemaPath)
 		} else {
 			log.Printf(col.Green("write %s/%s"), migrationsDir, schema)
 			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o644))
 		}
-		if pathExists(listPath) {
+		if readable(listPath) {
 			log.Printf(col.Yellow("skip %s"), listPath)
 		} else {
 			log.Printf(col.Green("write %s/%s"), migrationsDir, list)
@@ -69,7 +69,7 @@ func doInit() {
 		log.Printf(col.Red("mkdir %s: %s"), queriesDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), queriesDir)
-		if pathExists(queryPath) {
+		if readable(queryPath) {
 			log.Printf(col.Yellow("skip %s"), queryPath)
 		} else {
 			log.Printf(col.Green("write %s/%s"), queriesDir, query)
@@ -78,7 +78,7 @@ func doInit() {
 	}
 }
 
-func pathExists(path string) bool {
+func readable(path string) bool {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
+	return err == nil
 }
