@@ -8,9 +8,7 @@
 			oldConnection = connection
 			var err error
 			connection, err = connection.(*sql.DB).Begin()
-			if err != nil {
-				return err
-			}
+			return err
 		}
 		return errors.New("transaction already started")
 	}
