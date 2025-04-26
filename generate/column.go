@@ -103,7 +103,7 @@ func columnsToStruct(options *Options, name string, columns []Column, useID bool
 
 		if o, ok := suffixes[column.id]; ok && useID {
 			suffix = o
-		} else if v := len(seen[fieldName]); v > 0 && !column.IsNamedParam {
+		} else if v := len(seen[baseFieldName]); v > 0 && !column.IsNamedParam {
 			suffix = v + 1
 		}
 
