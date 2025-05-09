@@ -1,8 +1,8 @@
 package generate
 
 import (
+	"cmp"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/samber/lo"
@@ -77,8 +77,12 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 			structs = append(structs, s)
 		}
 	}
+
 	if len(structs) > 0 {
-		sort.Slice(structs, func(i, j int) bool { return structs[i].Name < structs[j].Name })
+		slices.SortFunc(structs, func(a, b Struct) int {
+			return cmp.Compare(a.Name, b.Name)
+		})
 	}
+
 	return structs
 }

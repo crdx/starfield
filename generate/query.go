@@ -273,8 +273,8 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 		queries = append(queries, query)
 	}
 
-	sort.Slice(queries, func(i, j int) bool {
-		return queries[i].MethodName < queries[j].MethodName
+	slices.SortFunc(queries, func(a Query, b Query) int {
+		return cmp.Compare(a.MethodName, b.MethodName)
 	})
 
 	return queries, nil
