@@ -48,10 +48,6 @@ func (self QueryValue) IsStruct() bool {
 	return self.Struct != nil
 }
 
-func (self QueryValue) isEmpty() bool {
-	return self.Typ == "" && self.Name == "" && self.Struct == nil
-}
-
 func (self QueryValue) Pair() string {
 	var out []string
 	for _, arg := range self.Pairs() {
@@ -177,6 +173,10 @@ func (self QueryValue) VariableForField(f Field) string {
 		return toLowerCase(f.Name)
 	}
 	return self.Name + "." + f.Name
+}
+
+func (self QueryValue) isEmpty() bool {
+	return self.Typ == "" && self.Name == "" && self.Struct == nil
 }
 
 func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct) ([]Query, error) {
