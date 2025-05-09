@@ -1,7 +1,8 @@
 package generate
 
 import (
-	"sort"
+	"cmp"
+	"slices"
 	"strings"
 
 	"github.com/sqlc-dev/plugin-sdk-go/metadata"
@@ -165,14 +166,14 @@ func (self QueryValue) Scan() string {
 	return "\n" + strings.Join(out, ",\n")
 }
 
-func (self QueryValue) VariableForField(f Field) string {
+func (self QueryValue) VariableForField(field Field) string {
 	if !self.IsStruct() {
 		return self.Name
 	}
 	if !self.EmitStruct() {
-		return toLowerCase(f.Name)
+		return toLowerCase(field.Name)
 	}
-	return self.Name + "." + f.Name
+	return self.Name + "." + field.Name
 }
 
 func (self QueryValue) isEmpty() bool {
