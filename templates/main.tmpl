@@ -193,8 +193,12 @@
 	}
 
 	// Now returns the current time.Time in UTC.
+	//
+	// Truncated to the nearest microsecond so that when it's passed into a query it's not turned
+	// into the nanosecond version, which is not supported. This can have subtle side-effects like
+	// preventing the use of certain indexes.
 	func Now() time.Time {
-		return time.Now().UTC()
+		return time.Now().UTC().Round(time.Microsecond)
 	}
 
 	// ToTime returns the time.Time that corresponds to the passed value. The value must be either
