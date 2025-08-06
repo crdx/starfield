@@ -8,8 +8,9 @@ import (
 )
 
 type Column struct {
-	id int
 	*plugin.Column
+
+	id int
 }
 
 func getType(column *plugin.Column) string {
