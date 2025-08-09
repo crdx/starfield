@@ -15,17 +15,21 @@ import (
 	"github.com/samber/lo"
 )
 
+const Version = "v1.6.0"
+
 func getUsage() string {
 	return `
 		Usage:
 			$0 [options] init
 			$0 [options] make-migration <name>
+			$0 [options] version
 	`
 }
 
 type Opts struct {
 	Init          bool   `docopt:"init"`
 	MakeMigration bool   `docopt:"make-migration"`
+	Version       bool   `docopt:"version"`
 	Name          string `docopt:"<name>"`
 }
 
@@ -39,6 +43,11 @@ func main() {
 	log.SetFlags(0)
 
 	opts := duckopt.MustBind[Opts](getUsage(), "$0")
+
+	if opts.Version {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
 
 	if opts.Init {
 		doInit()

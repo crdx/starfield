@@ -2,6 +2,9 @@
 set -euo pipefail
 
 read -rp "Press enter to deploy v$1"
+
+sed -i "s/const Version = \"v[0-9]\+\.[0-9]\+\.[0-9]\+\"/const Version = \"v$1\"/g" cmd/starfieldctl/main.go
 sed -i "s/starfield\tv[0-9]\+\.[0-9]\+\.[0-9]\+/starfield\tv$1/g" templates/header.tmpl
-git add templates/header.tmpl
+
+git add cmd/starfieldctl/main.go templates/header.tmpl
 git commit -m "Release v$1"
