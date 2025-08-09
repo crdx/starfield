@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+read -rp "Press enter to deploy v$1"
+sed -i "s/starfield\tv[0-9]\+\.[0-9]\+\.[0-9]\+/starfield\tv$1/g" templates/header.tmpl
+git add templates/header.tmpl
+git commit -m "Release v$1"
