@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	crdx.org/col v1.1.1
+	crdx.org/duckopt/v2 v2.3.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/jinzhu/inflection v1.0.0
 	github.com/samber/lo v1.47.0
@@ -13,6 +14,8 @@ require (
 )
 
 require (
+	crdx.org/hereduck v1.0.4 // indirect
+	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240823204242-4ba0660f739c // indirect

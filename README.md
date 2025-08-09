@@ -92,9 +92,11 @@ plugins:
 
 ## Usage
 
-See the template [sqlc.yml](https://github.com/crdx/starfield/blob/main/scaffold/sqlc.yml) for an example of how to use the plugin. Alternatively, use the `starfield init` command to create a basic project structure in the current directory.
+### Init
 
-Next, call the `Init` function from the generated package (which is `db` by default) to set up the database connection. For documentation on each member below refer to the package documentation.
+See the template [sqlc.yml](https://github.com/crdx/starfield/blob/main/scaffold/sqlc.yml) for an example of how to use the plugin. Alternatively, use the `starfieldctl init` command to create a basic project structure in the current directory.
+
+You will want to call the `Init` function from the generated package (which is `db` by default) to set up the database connection. For documentation on each member below refer to the package documentation.
 
 ```go
 db.Init(&db.Config{
@@ -128,6 +130,10 @@ db.Init(&db.Config{
     // ...
 }
 ```
+
+### Migration generator
+
+Use `starfieldctl make-migration <name>` to make a migration. The name will be converted to snake case, if needed.
 
 ## Contributions
 
