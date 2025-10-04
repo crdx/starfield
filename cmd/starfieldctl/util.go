@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-func isReadable(path string) bool {
+func exists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }

@@ -67,7 +67,7 @@ func doInit() {
 	mainPath := path.Join(schemaDir, "main.go")
 	queryPath := path.Join(queriesDir, "foos.sql")
 
-	if isReadable(sqlcFile) {
+	if exists(sqlcFile) {
 		log.Printf(col.Yellow("skip %s"), sqlcFile)
 	} else {
 		log.Printf(col.Green("write %s"), sqlcFile)
@@ -82,13 +82,13 @@ func doInit() {
 		log.Printf(col.Red("mkdir %s: %s"), schemaDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), schemaDir)
-		if isReadable(schemaPath) {
+		if exists(schemaPath) {
 			log.Printf(col.Yellow("skip %s"), schemaPath)
 		} else {
 			log.Printf(col.Green("write %s"), schemaPath)
 			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o644))
 		}
-		if isReadable(mainPath) {
+		if exists(mainPath) {
 			log.Printf(col.Yellow("skip %s"), mainPath)
 		} else {
 			log.Printf(col.Green("write %s"), mainPath)
@@ -100,7 +100,7 @@ func doInit() {
 		log.Printf(col.Red("mkdir %s: %s"), queriesDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), queriesDir)
-		if isReadable(queryPath) {
+		if exists(queryPath) {
 			log.Printf(col.Yellow("skip %s"), queryPath)
 		} else {
 			log.Printf(col.Green("write %s"), queryPath)
