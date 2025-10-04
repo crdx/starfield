@@ -127,11 +127,12 @@ func makeMigration(name string) {
 		outputMigrationMessage(false, fileName, "duplicate")
 	}
 
-	_, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0o644)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0o644)
 	if err != nil {
 		outputMigrationMessage(false, fileName, err.Error())
 	}
 
+	_ = f.Close()
 	outputMigrationMessage(true, fileName, "created")
 }
 
