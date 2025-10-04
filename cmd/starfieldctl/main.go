@@ -15,7 +15,7 @@ import (
 	"github.com/samber/lo"
 )
 
-const Version = "v1.8.0"
+const Version = "v1.8.1"
 
 func getUsage() string {
 	return `
