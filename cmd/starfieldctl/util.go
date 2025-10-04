@@ -2,9 +2,29 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"unicode"
+
+	"gopkg.in/yaml.v2"
 )
+
+func getSchemaDir(sqlcFile string) (string, error) {
+	b, err := os.ReadFile(sqlcFile)
+	if err != nil {
+		return "", err
+	}
+	var config Config
+	if err := yaml.Unmarshal(b, &config); err != nil {
+		return "", err
+	}
+
+	if len(config.SQL) != 1 {
+		return "", fmt.Errorf("unexpected number of sql blocks in sqlc.yml")
+	}
+
+	return config.SQL[0].Schema, nil
+}
 
 func exists(path string) bool {
 	_, err := os.Stat(path)

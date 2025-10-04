@@ -34,9 +34,7 @@ type Opts struct {
 }
 
 const (
-	schemaDir  = "db/schema"
-	queriesDir = "db/queries"
-	sqlcFile   = "sqlc.yml"
+	sqlcFile = "sqlc.yml"
 )
 
 func main() {
@@ -62,6 +60,9 @@ func main() {
 
 func doInit() {
 	log.SetFlags(0)
+
+	schemaDir := "db/schema"
+	queriesDir := "db/queries"
 
 	schemaPath := path.Join(schemaDir, "0000000000_init.sql")
 	mainPath := path.Join(schemaDir, "main.go")
@@ -110,15 +111,41 @@ func doInit() {
 }
 
 func makeMigration(name string) {
-	fileName := fmt.Sprintf("%d_%s", time.Now().UTC().Unix(), snakeCase(name)) + ".sql"
-
-	// TODO(x): read from sqlc.yml itself instead of assuming the default
-	filePath := filepath.Join(schemaDir, fileName)
-
-	_, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0o644)
+	schemaDir, err := getSchemaDir(sqlcFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("✓ %s", col.Green(fileName))
+	fileName := fmt.Sprintf("%d_%s", time.Now().UTC().Unix(), snakeCase(name)) + ".sql"
+	filePath := filepath.Join(schemaDir, fileName)
+
+	if err := os.MkdirAll(schemaDir, 0o755); err != nil {
+		outputMigrationMessage(false, fileName, "mkdir")
+	}
+
+	if exists(filePath) {
+		outputMigrationMessage(false, fileName, "duplicate")
+	}
+
+	_, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0o644)
+	if err != nil {
+		outputMigrationMessage(false, fileName, err.Error())
+	}
+
+	outputMigrationMessage(true, fileName, "created")
+}
+
+func outputMigrationMessage(ok bool, fileName string, message string) {
+	var icon string
+	if ok {
+		icon = col.Green("✓")
+		fileName = col.Green(fileName)
+	} else {
+		icon = col.Red("𐄂")
+		fileName = col.Red(fileName)
+	}
+	fmt.Printf("%s %s [%s]\n", icon, col.Red(fileName), message)
+	if !ok {
+		os.Exit(1)
+	}
 }

@@ -11,6 +11,7 @@ require (
 	github.com/samber/mo v1.14.1
 	github.com/sqlc-dev/plugin-sdk-go v1.23.0
 	golang.org/x/text v0.28.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
