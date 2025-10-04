@@ -154,7 +154,7 @@ func getIdentifierName(name string, options *Options) string {
 		return rune('_')
 	}, name)
 
-	for _, p := range strings.Split(name, "_") {
+	for p := range strings.SplitSeq(name, "_") {
 		if p == "id" {
 			out += "ID"
 		} else {
