@@ -21,8 +21,11 @@ func getUsage() string {
 	return `
 		Usage:
 			$0 [options] init
-			$0 [options] make-migration <name>
+			$0 [options] make-migration <name> [--unix]
 			$0 [options] version
+
+		Options:
+			-u, --unix    Use legacy timestamp format in migration names
 	`
 }
 
@@ -31,6 +34,7 @@ type Opts struct {
 	MakeMigration bool   `docopt:"make-migration"`
 	Version       bool   `docopt:"version"`
 	Name          string `docopt:"<name>"`
+	Unix          bool   `docopt:"--unix"`
 }
 
 const (
@@ -53,7 +57,7 @@ func main() {
 	}
 
 	if opts.MakeMigration {
-		makeMigration(opts.Name)
+		makeMigration(opts.Name, opts.Unix)
 		os.Exit(0)
 	}
 }
@@ -110,13 +114,23 @@ func doInit() {
 	}
 }
 
-func makeMigration(name string) {
+func getMigrationID(name string, unix bool) string {
+	name = snakeCase(name)
+
+	if unix {
+		return fmt.Sprintf("%d_%s", time.Now().UTC().Unix(), name)
+	} else {
+		return fmt.Sprintf("%s_%s", time.Now().UTC().Format("20060102150405"), name)
+	}
+}
+
+func makeMigration(name string, unix bool) {
 	schemaDir, err := getSchemaDir(sqlcFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fileName := fmt.Sprintf("%d_%s", time.Now().UTC().Unix(), snakeCase(name)) + ".sql"
+	fileName := getMigrationID(name, unix) + ".sql"
 	filePath := filepath.Join(schemaDir, fileName)
 
 	if err := os.MkdirAll(schemaDir, 0o755); err != nil {
