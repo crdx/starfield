@@ -112,11 +112,11 @@ db.Init(&db.Config{
         return dsn
     }),
     Migrations:   migrations.List(),
-    Fresh:        false,
     Create:       true,
     EnableLogger: env.Debug(),
-    ErrorHandler: func(err error) { panic(err) },
-    Seed:         func() { },
+    // Fresh:        false
+    // ErrorHandler: func(err error) { panic(err) },
+    // Seed:         func() { },
 })
 ```
 
