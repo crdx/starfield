@@ -68,7 +68,7 @@ func doInit() {
 	schemaDir := "db/schema"
 	queriesDir := "db/queries"
 
-	schemaPath := path.Join(schemaDir, "0000000000_init.sql")
+	schemaPath := path.Join(schemaDir, "00000000000000_init.sql")
 	mainPath := path.Join(schemaDir, "main.go")
 	queryPath := path.Join(queriesDir, "foos.sql")
 
