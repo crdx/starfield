@@ -14,7 +14,7 @@ type Options struct {
 	Package   string            `json:"package" yaml:"package"`
 	Rename    map[string]string `json:"rename,omitempty" yaml:"rename"`
 	Preserve  []string          `json:"preserve,omitempty" yaml:"preserve"`
-	MaxParams mo.Option[int]    `json:"max_params,omitempty" yaml:"max_params"`
+	MaxParams mo.Option[int]    `json:"max_params,omitempty" yaml:"max_params"` //nolint
 }
 
 func parseOptions(req *plugin.GenerateRequest) (*Options, error) {

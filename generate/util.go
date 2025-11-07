@@ -30,19 +30,19 @@ func formatTags(tags map[string]string) string {
 }
 
 func toCamelCase(s string) string {
-	out := ""
+	var out strings.Builder
 	for i, part := range strings.Split(s, "_") {
 		if i == 0 {
-			out += part
+			out.WriteString(part)
 			continue
 		}
 		if part == "id" {
-			out += "ID"
+			out.WriteString("ID")
 		} else {
-			out += cases.Title(language.English).String(part)
+			out.WriteString(cases.Title(language.English).String(part))
 		}
 	}
-	return out
+	return out.String()
 }
 
 func toLowerCase(s string) string {
