@@ -57,6 +57,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 		"getMethod":      getMethod,
 		"getReturnValue": getReturnValue,
 		"oneline":        oneline,
+		"toPlural":       func(s string) string { return toPlural(s, options.Preserve) },
 	}
 
 	templateEngine := template.Must(

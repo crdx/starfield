@@ -139,6 +139,16 @@ func toSingular(s string, exclusions []string) string {
 	return inflection.Singular(s)
 }
 
+func toPlural(s string, exclusions []string) string {
+	for _, exclusion := range exclusions {
+		if strings.EqualFold(s, exclusion) {
+			return s + "List"
+		}
+	}
+
+	return inflection.Plural(s)
+}
+
 func getIdentifierName(name string, options *Options) string {
 	if rename := options.Rename[name]; rename != "" {
 		return rename

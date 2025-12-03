@@ -7,7 +7,7 @@
 	{{ $hasID := .HasID }}
 	{{ $fields := .Fields }}
 
-	// Get{{ $name }}TableStatus returns the TableStatus for the {{ $name }}s table.
+	// Get{{ $name }}TableStatus returns the TableStatus for the {{ toPlural $name }} table.
 	func Get{{ $name }}TableStatus() (TableStatus, error) {
 	    row := QueryRow(`SHOW TABLE STATUS LIKE {{ printf "%q" $table.Name }}`)
 
@@ -113,8 +113,8 @@
 		}
 	{{ end }}
 
-	// Find{{ $name }}s finds all non-deleted instances of {{ $name }}.
-	func Find{{ $name }}s() []*{{ $name }} {
+	// Find{{ toPlural $name }} finds all non-deleted instances of {{ $name }}.
+	func Find{{ toPlural $name }}() []*{{ $name }} {
 		rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}`{{ if $hasDeletedAt }} where deleted_at is null{{ end }} order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 		if err != nil {
 			handleError(err)
@@ -155,8 +155,8 @@
 	{{ end }}
 
 	{{ if $hasDeletedAt }}
-		// Find{{ $name }}sUnscoped finds all instances (including deleted) of {{ $name }}.
-		func Find{{ $name }}sUnscoped() []*{{ $name }} {
+		// Find{{ toPlural $name }}Unscoped finds all instances (including deleted) of {{ $name }}.
+		func Find{{ toPlural $name }}Unscoped() []*{{ $name }} {
 			rows, err := Query("select {{ $fieldNames }} from `{{ $table.Name }}` order by {{ if $hasID }}id{{ else if $hasCreatedAt }}created_at{{ else }}`{{ (index $fields 0).Column.Name }}`{{ end }} asc")
 			if err != nil {
 				handleError(err)
@@ -237,8 +237,8 @@
 
 	{{ range $fields }}
 		{{ if and (ne .Name "ID") (ne .Name "DeletedAt") (ne .Name "CreatedAt") }}
-			// Find{{ $name }}sBy{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}.
-			func Find{{ $name }}sBy{{ .Name }}(value {{ .Type }}) []*{{ $name }} {
+			// Find{{ toPlural $name }}By{{ .Name }} finds all non-deleted instances of {{ $name }} by {{ .Name }}.
+			func Find{{ toPlural $name }}By{{ .Name }}(value {{ .Type }}) []*{{ $name }} {
 				var rows *sql.Rows
 				var err error
 				{{- if .Nullable }}
@@ -280,8 +280,8 @@
 			}
 
 			{{ if $hasDeletedAt }}
-				// Find{{ $name }}sBy{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}.
-				func Find{{ $name }}sBy{{ .Name }}Unscoped(value {{ .Type }}) []*{{ $name }} {
+				// Find{{ toPlural $name }}By{{ .Name }}Unscoped finds all instances (including deleted) of {{ $name }} by {{ .Name }}.
+				func Find{{ toPlural $name }}By{{ .Name }}Unscoped(value {{ .Type }}) []*{{ $name }} {
 					var rows *sql.Rows
 					var err error
 					{{- if .Nullable }}
