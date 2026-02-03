@@ -68,7 +68,7 @@
 				handleError(err)
 				return nil
 			}
-			value.ID = lastInsertID
+			{{ if .HasUnsignedID }}value.ID = uint64(lastInsertID){{ else }}value.ID = lastInsertID{{ end }}
 		{{ end }}
 		return value
 	}

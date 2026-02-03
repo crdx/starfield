@@ -22,6 +22,7 @@ type Struct struct {
 	HasCreatedAt         bool
 	HasNullableCreatedAt bool
 	HasID                bool
+	HasUnsignedID        bool
 }
 
 func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
@@ -72,6 +73,7 @@ func makeStructs(req *plugin.GenerateRequest, options *Options) []Struct {
 			s.HasNullableCreatedAt = fieldMap["created_at"].Nullable
 			s.HasCreatedAt = slices.Contains(fieldNames, "created_at")
 			s.HasID = slices.Contains(fieldNames, "id")
+			s.HasUnsignedID = s.HasID && fieldMap["id"].Column.Unsigned
 			s.Placeholders = strings.Join(fillSlice(len(s.Fields), "?"), ", ")
 
 			structs = append(structs, s)
