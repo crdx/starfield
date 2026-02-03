@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"unicode"
 
 	"gopkg.in/yaml.v2"
 )
 
 func getSchemaDir(sqlcFile string) (string, error) {
-	b, err := os.ReadFile(sqlcFile)
+	b, err := os.ReadFile(filepath.Clean(sqlcFile))
 	if err != nil {
 		return "", err
 	}

@@ -76,14 +76,14 @@ func doInit() {
 		log.Printf(col.Yellow("skip %s"), sqlcFile)
 	} else {
 		log.Printf(col.Green("write %s"), sqlcFile)
-		file := lo.Must(os.OpenFile(sqlcFile, os.O_CREATE|os.O_WRONLY, 0o644))
+		file := lo.Must(os.OpenFile(sqlcFile, os.O_CREATE|os.O_WRONLY, 0o600))
 		lo.Must0(template.Must(template.New(sqlcFile).Parse(scaffold.SqlcYML)).Execute(
 			file,
 			map[string]string{"Name": path.Base(lo.Must(os.Getwd()))},
 		))
 	}
 
-	if err := os.MkdirAll(schemaDir, 0o755); err != nil {
+	if err := os.MkdirAll(schemaDir, 0o750); err != nil {
 		log.Printf(col.Red("mkdir %s: %s"), schemaDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), schemaDir)
@@ -91,17 +91,17 @@ func doInit() {
 			log.Printf(col.Yellow("skip %s"), schemaPath)
 		} else {
 			log.Printf(col.Green("write %s"), schemaPath)
-			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o644))
+			lo.Must0(os.WriteFile(schemaPath, scaffold.MigrationSQL, 0o600))
 		}
 		if exists(mainPath) {
 			log.Printf(col.Yellow("skip %s"), mainPath)
 		} else {
 			log.Printf(col.Green("write %s"), mainPath)
-			lo.Must0(os.WriteFile(mainPath, scaffold.MainGo, 0o644))
+			lo.Must0(os.WriteFile(mainPath, scaffold.MainGo, 0o600))
 		}
 	}
 
-	if err := os.MkdirAll(queriesDir, 0o755); err != nil {
+	if err := os.MkdirAll(queriesDir, 0o750); err != nil {
 		log.Printf(col.Red("mkdir %s: %s"), queriesDir, err)
 	} else {
 		log.Printf(col.Green("mkdir %s"), queriesDir)
@@ -109,7 +109,7 @@ func doInit() {
 			log.Printf(col.Yellow("skip %s"), queryPath)
 		} else {
 			log.Printf(col.Green("write %s"), queryPath)
-			lo.Must0(os.WriteFile(queryPath, scaffold.QuerySQL, 0o644))
+			lo.Must0(os.WriteFile(queryPath, scaffold.QuerySQL, 0o600))
 		}
 	}
 }
@@ -133,7 +133,7 @@ func makeMigration(name string, unix bool) {
 	fileName := getMigrationID(name, unix) + ".sql"
 	filePath := filepath.Join(schemaDir, fileName)
 
-	if err := os.MkdirAll(schemaDir, 0o755); err != nil {
+	if err := os.MkdirAll(schemaDir, 0o750); err != nil {
 		outputMigrationMessage(false, fileName, "mkdir")
 	}
 
@@ -141,7 +141,7 @@ func makeMigration(name string, unix bool) {
 		outputMigrationMessage(false, fileName, "duplicate")
 	}
 
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0o644)
+	f, err := os.OpenFile(filepath.Clean(filePath), os.O_WRONLY|os.O_CREATE, 0o600)
 	if err != nil {
 		outputMigrationMessage(false, fileName, err.Error())
 	}
