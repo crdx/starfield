@@ -53,7 +53,7 @@ You can check out the package-level documentation for the specifics, but here is
 - `Pluck`, `MapByID`, `MapBy`, `MapBy2` extract values out of structs into different datatypes like maps and slices.
 - `BeginTransaction`, `CommitTransaction`, `RollbackTransaction` handle database transactions.
 
-## Installation
+## Plugin installation
 
 There are two ways to use sqlc plugins: as a standard binary or a sandboxed wasm binary. For security, wasm binaries are recommended when running untrusted plugins, however, a significant performance penalty is incurred in this case. As this repository is a mere ~1100 lines of code it's recommended to vet the code and then use the faster, process-based method.
 
@@ -61,15 +61,21 @@ For completeness both are documented below. For more information on using plugin
 
 ### Process
 
-Go to the [releases page](https://github.com/crdx/starfield/releases) and download the latest `starfield` binary.
+Install the binary with [mise](https://mise.jdx.dev):
 
-Define it as a plugin in `sqlc.yml`:
+```bash
+mise use github:crdx/starfield
+```
+
+Alternatively, go to the [releases page](https://github.com/crdx/starfield/releases) and download the latest `starfield` binary.
+
+Then define it as a plugin in `sqlc.yml`:
 
 ```yaml
 plugins:
   - name: starfield
     process:
-      cmd: /path/to/starfield
+      cmd: starfield
 ```
 
 ### Wasm
@@ -90,11 +96,19 @@ plugins:
       sha256: xxx
 ```
 
-## Usage
+## CLI installation
 
-### Init
+Install `starfieldctl` with [mise](https://mise.jdx.dev):
 
-See the template [sqlc.yml](https://github.com/crdx/starfield/blob/main/scaffold/sqlc.yml) for an example of how to use the plugin. Alternatively, use the `starfieldctl init` command to create a basic project structure in the current directory.
+```bash
+mise use github:crdx/starfield
+```
+
+Alternatively, go to the [releases page](https://github.com/crdx/starfield/releases) and download the latest `starfieldctl` binary.
+
+## Configuration
+
+See the template [sqlc.yml](https://github.com/crdx/starfield/blob/main/scaffold/sqlc.yml) for an example of how to configure the plugin. Alternatively, you can use the `starfieldctl init` command to create a basic project structure in the current directory.
 
 You will want to call the `Init` function from the generated package (which is `db` by default) to set up the database connection. For documentation on each member below refer to the package documentation.
 
@@ -131,9 +145,9 @@ db.Init(&db.Config{
 }
 ```
 
-### Migration generator
+## Migrations
 
-Use `starfieldctl make-migration <name>` to make a migration. The name will be converted to snake case, if needed.
+Use `starfieldctl make-migration <name>` to create a migration. The name will be converted to snake case.
 
 ## Contributions
 
