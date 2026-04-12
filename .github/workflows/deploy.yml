@@ -18,6 +18,7 @@ jobs:
           GOOS=wasip1 GOARCH=wasm go build -o starfield.wasm ./cmd/starfield
           CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o starfield ./cmd/starfield
           CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o starfieldctl ./cmd/starfieldctl
+          tar czf starfield_linux_amd64.tar.gz starfield starfieldctl
 
       - name: Get version
         run: |
@@ -44,3 +45,4 @@ jobs:
             ${{ github.workspace }}/starfield.wasm
             ${{ github.workspace }}/starfield
             ${{ github.workspace }}/starfieldctl
+            ${{ github.workspace }}/starfield_linux_amd64.tar.gz
