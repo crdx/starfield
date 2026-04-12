@@ -166,7 +166,7 @@ func getIdentifierName(name string, options *Options) string {
 
 	for p := range strings.SplitSeq(name, "_") {
 		if p == "id" {
-			out += "ID"
+			out += "ID" //nolint:modernize // not a meaningful performance increase
 		} else {
 			out += cases.Title(language.English).String(p)
 		}
