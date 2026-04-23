@@ -2,9 +2,7 @@
 
 **starfield** is a MySQL/SQLite sqlc plugin based on [sqlc-gen-go](https://github.com/sqlc-dev/sqlc-gen-go).
 
-## Introduction
-
-Read the [introductory post](https://textplain.org/starfield).
+Read [the introduction post](https://textplain.org/starfield).
 
 ## Features
 
