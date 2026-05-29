@@ -1,10 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-read -rp "Press enter to deploy v$1"
+NEW_VERSION="$1"
 
-sed -i "s/const Version = \"v[0-9]\+\.[0-9]\+\.[0-9]\+\"/const Version = \"v$1\"/g" cmd/starfieldctl/main.go
-sed -i "s/starfield\tv[0-9]\+\.[0-9]\+\.[0-9]\+/starfield\tv$1/g" templates/header.tmpl
+sed -i "s/const Version = \"v[0-9]\+\.[0-9]\+\.[0-9]\+\"/const Version = \"v${NEW_VERSION}\"/g" cmd/starfieldctl/main.go
+sed -i "s/starfield\tv[0-9]\+\.[0-9]\+\.[0-9]\+/starfield\tv${NEW_VERSION}/g" templates/header.tmpl
 
-git add cmd/starfieldctl/main.go templates/header.tmpl
-git commit -m "Release v$1"
+git add cmd/starfieldctl/main.go templates/header.tmpl CHANGELOG.md
+if git diff --cached --quiet; then
+    echo "Nothing to commit (files already committed)."
+else
+    git commit -m "Release v${NEW_VERSION}"
+fi

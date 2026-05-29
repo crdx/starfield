@@ -1,0 +1,45 @@
+name: release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+            - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+              with:
+                  go-version-file: go.mod
+
+            - name: Install just
+              run: curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --tag 1.50.0 --to /usr/local/bin
+
+            - name: Extract changelog
+              id: changelog
+              run: |
+                  BODY=$(just release::notes "${GITHUB_REF_NAME}")
+                  {
+                      echo "body<<EOF"
+                      echo "$BODY"
+                      echo "EOF"
+                  } >> "$GITHUB_OUTPUT"
+
+            - name: Create release
+              run: |
+                  TAG="${GITHUB_REF#refs/tags/}"
+                  gh release create "$TAG" --title "$TAG" --notes "$BODY" --latest
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  BODY: ${{ steps.changelog.outputs.body }}
+
+            - name: Warm Go proxy
+              run: GOPROXY=proxy.golang.org go list -m "${MODULE_PATH}@${GITHUB_REF_NAME}"
+              env:
+                  MODULE_PATH: crdx.org/starfield
