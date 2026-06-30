@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.1] - 2026-06-30
+
+### Changes
+
+- Handle `bigint signed` and `bigint unsigned` column types.
+
 ## [1.10.0] - 2026-04-12
 
 ### Changes
