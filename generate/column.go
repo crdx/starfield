@@ -31,7 +31,7 @@ func getType(column *plugin.Column) string {
 		} else {
 			return "sql.Null[bool]"
 		}
-	case "int", "bigint", "integer", "smallint", "mediumint", "year":
+	case "int", "bigint", "bigint signed", "bigint unsigned", "integer", "smallint", "mediumint", "year":
 		if notNull {
 			if unsigned {
 				return "uint64"
