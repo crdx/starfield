@@ -31,10 +31,21 @@ jobs:
                       echo "EOF"
                   } >> "$GITHUB_OUTPUT"
 
+            - name: Build binaries
+              run: |
+                  GOOS=wasip1 GOARCH=wasm go build -o starfield.wasm ./cmd/starfield
+                  CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o starfield ./cmd/starfield
+                  CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o starfieldctl ./cmd/starfieldctl
+                  tar czf starfield_linux_amd64.tar.gz starfield starfieldctl
+
             - name: Create release
               run: |
                   TAG="${GITHUB_REF#refs/tags/}"
-                  gh release create "$TAG" --title "$TAG" --notes "$BODY" --latest
+                  gh release create "$TAG" --title "$TAG" --notes "$BODY" --latest \
+                      starfield.wasm \
+                      starfield \
+                      starfieldctl \
+                      starfield_linux_amd64.tar.gz
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   BODY: ${{ steps.changelog.outputs.body }}
