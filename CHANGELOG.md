@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0] - 2026-07-27
+
+### Changes
+
+- Add `--target` to `starfieldctl make-migration` to select which db to target.
+- Stop `starfieldctl make-migration` failing when using more than one db.
+
 ## [1.10.1] - 2026-06-30
 
 ### Changes
