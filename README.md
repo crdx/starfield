@@ -147,6 +147,12 @@ db.Init(&db.Config{
 
 Use `starfieldctl make-migration <name>` to create a migration. The name will be converted to snake case.
 
+The migration is created in the schema directory of the sole `sql` block in `sqlc.yml`. When there is more than one block, name the one to use with `--target`, which matches on the block's `name`.
+
+```sh
+starfieldctl make-migration add_users --target store
+```
+
 ## Contributions
 
 Open an [issue](https://github.com/crdx/starfield/issues) or send a [pull request](https://github.com/crdx/starfield/pulls).

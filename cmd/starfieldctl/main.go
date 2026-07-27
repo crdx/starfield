@@ -21,11 +21,12 @@ func getUsage() string {
 	return `
 		Usage:
 			$0 [options] init
-			$0 [options] make-migration <name> [--unix]
+			$0 [options] make-migration <name> [--unix] [--target=<target>]
 			$0 [options] version
 
 		Options:
-			-u, --unix    Use legacy timestamp format in migration names
+			-u, --unix               Use legacy timestamp format in migration names
+			-t, --target=<target>    Target to create the migration for
 	`
 }
 
@@ -35,6 +36,7 @@ type Opts struct {
 	Version       bool   `docopt:"version"`
 	Name          string `docopt:"<name>"`
 	Unix          bool   `docopt:"--unix"`
+	Target        string `docopt:"--target"`
 }
 
 const (
@@ -57,7 +59,7 @@ func main() {
 	}
 
 	if opts.MakeMigration {
-		makeMigration(opts.Name, opts.Unix)
+		makeMigration(opts.Name, opts.Unix, opts.Target)
 		os.Exit(0)
 	}
 }
@@ -124,8 +126,8 @@ func getMigrationID(name string, unix bool) string {
 	}
 }
 
-func makeMigration(name string, unix bool) {
-	schemaDir, err := getSchemaDir(sqlcFile)
+func makeMigration(name string, unix bool, target string) {
+	schemaDir, err := resolveSchemaDir(sqlcFile, target)
 	if err != nil {
 		log.Fatal(err)
 	}

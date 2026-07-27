@@ -5,5 +5,6 @@ type Config struct {
 }
 
 type Entry struct {
+	Name   string `yaml:"name"`
 	Schema string `yaml:"schema"`
 }
