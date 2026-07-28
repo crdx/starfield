@@ -39,6 +39,7 @@ func (self *Importer) mainImports() FileImports {
 	std, pkg := buildImports(nil, self.usesType)
 
 	std["bytes"] = true
+	std["context"] = true
 	std["database/sql"] = true
 	std["errors"] = true
 	std["fmt"] = true

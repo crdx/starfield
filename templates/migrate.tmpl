@@ -5,14 +5,38 @@
 		SQL  string
 	}
 
+	const migrateLockTimeout = 30
+
 	func migrate(dsn *DSN) error {
-		connection, err := config.Open(dsn)
+		pool, err := config.Open(dsn)
+		if err != nil {
+			return err
+		}
+		defer pool.Close() //nolint:errcheck
+
+		ctx := context.Background()
+		connection, err := pool.Conn(ctx)
 		if err != nil {
 			return err
 		}
 		defer connection.Close() //nolint:errcheck
 
-		_, err = connection.Exec(`
+		lockName := "sf_migrate_" + dsn.DBName
+		if len(lockName) > 64 {
+			lockName = lockName[:64]
+		}
+
+		var acquired sql.NullInt64
+		if err := connection.QueryRowContext(ctx, "select get_lock(?, ?)", lockName, migrateLockTimeout).Scan(&acquired); err != nil {
+			return err
+		}
+		if !acquired.Valid || acquired.Int64 != 1 {
+			return fmt.Errorf("timed out after %ds acquiring migration lock %s", migrateLockTimeout, lockName)
+		}
+
+		defer connection.ExecContext(ctx, "select release_lock(?)", lockName) //nolint:errcheck
+
+		_, err = connection.ExecContext(ctx, `
 			create table if not exists migrations (
 				name varchar(512) not null primary key,
 				migrated_at datetime not null
@@ -22,7 +46,7 @@
 			return err
 		}
 
-		rows, err := connection.Query("select name from migrations")
+		rows, err := connection.QueryContext(ctx, "select name from migrations")
 		if err != nil {
 			return err
 		}
@@ -57,12 +81,13 @@
 				continue
 			}
 
-			_, err = connection.Exec(sql)
+			_, err = connection.ExecContext(ctx, sql)
 			if err != nil {
 				return fmt.Errorf("%s: %w", migration.Name, err)
 			}
 
-			_, err = connection.Exec(
+			_, err = connection.ExecContext(
+				ctx,
 				"insert into migrations (name, migrated_at) values (?, ?)",
 				migration.Name,
 				Now().UTC(),
