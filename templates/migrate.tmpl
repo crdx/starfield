@@ -31,10 +31,12 @@
 		for rows.Next() {
 			var id string
 			if err := rows.Scan(&id); err != nil {
+				rows.Close() //nolint:errcheck
 				return err
 			}
 			ran[id] = true
 		}
+		rows.Close() //nolint:errcheck
 
 		for _, migration := range config.Migrations {
 			if ran[migration.Name] {
