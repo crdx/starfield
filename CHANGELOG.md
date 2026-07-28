@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1] - 2026-07-28
+
+### Fixed
+
+- Prevent migration race between multiple dbs
+- Close the rows handle when we should
+
 ## [1.11.0] - 2026-07-27
 
 ### Added
