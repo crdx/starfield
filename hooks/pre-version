@@ -3,10 +3,17 @@ set -euo pipefail
 
 NEW_VERSION="$1"
 
-sed -i "s/const Version = \"v[0-9]\+\.[0-9]\+\.[0-9]\+\"/const Version = \"v${NEW_VERSION}\"/g" cmd/starfieldctl/main.go
-sed -i "s/starfield\tv[0-9]\+\.[0-9]\+\.[0-9]\+/starfield\tv${NEW_VERSION}/g" templates/header.tmpl
+SEMVER='[0-9]\+\.[0-9]\+\.[0-9]\+'
 
-git add cmd/starfieldctl/main.go templates/header.tmpl CHANGELOG.md
+BANNER_FILES=(templates/header.tmpl generate/testdata/db.gen.go)
+
+sed -i "s/const Version = \"v${SEMVER}\"/const Version = \"v${NEW_VERSION}\"/g" cmd/starfieldctl/main.go
+
+for FILE in "${BANNER_FILES[@]}"; do
+    sed -i "s/starfield\tv${SEMVER}/starfield\tv${NEW_VERSION}/g" "$FILE"
+done
+
+git add cmd/starfieldctl/main.go "${BANNER_FILES[@]}" CHANGELOG.md
 if git diff --cached --quiet; then
     echo "Nothing to commit (files already committed)."
 else

@@ -1,0 +1,711 @@
+{
+  "settings":  {
+    "version":  "2",
+    "engine":  "mysql",
+    "schema":  [
+      "schema"
+    ],
+    "queries":  [
+      "queries"
+    ],
+    "codegen":  {
+      "out":  "db",
+      "plugin":  "starfield",
+      "options":  "eyJtYXhfcGFyYW1zIjozLCJwYWNrYWdlIjoiZGIifQ==",
+      "process":  {
+        "cmd":  "starfield"
+      }
+    }
+  },
+  "catalog":  {
+    "defaultSchema":  "public",
+    "schemas":  [
+      {
+        "name":  "public",
+        "tables":  [
+          {
+            "rel":  {
+              "name":  "users"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "created_at",
+                "notNull":  true,
+                "length":  19,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              },
+              {
+                "name":  "deleted_at",
+                "length":  19,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              },
+              {
+                "name":  "name",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "email",
+                "length":  255,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "age",
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "int"
+                }
+              },
+              {
+                "name":  "active",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              },
+              {
+                "name":  "balance",
+                "notNull":  true,
+                "length":  10,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "decimal"
+                }
+              },
+              {
+                "name":  "score",
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "double"
+                }
+              },
+              {
+                "name":  "notes",
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "text"
+                }
+              },
+              {
+                "name":  "avatar",
+                "length":  -1,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "blob"
+                }
+              },
+              {
+                "name":  "last_login",
+                "length":  19,
+                "table":  {
+                  "name":  "users"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "posts"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "created_at",
+                "notNull":  true,
+                "length":  19,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              },
+              {
+                "name":  "user_id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "title",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "body",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "text"
+                }
+              },
+              {
+                "name":  "published",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "posts"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "queries":  [
+    {
+      "text":  "select id, created_at, user_id, title, body, published from posts where user_id = ? order by created_at desc",
+      "name":  "FetchPostsByUser",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "id",
+          "unsigned":  true
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "user_id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "user_id",
+          "unsigned":  true
+        },
+        {
+          "name":  "title",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "title"
+        },
+        {
+          "name":  "body",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "text"
+          },
+          "originalName":  "body"
+        },
+        {
+          "name":  "published",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "published"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "user_id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "posts"
+            },
+            "type":  {
+              "name":  "int"
+            },
+            "originalName":  "user_id",
+            "unsigned":  true
+          }
+        }
+      ],
+      "filename":  "posts.sql"
+    },
+    {
+      "text":  "select title from posts where published = 1",
+      "name":  "FetchPublishedPostTitles",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "title",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "posts"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "title"
+        }
+      ],
+      "filename":  "posts.sql"
+    },
+    {
+      "text":  "select id, created_at, deleted_at, name, email, age, active, balance, score, notes, avatar, last_login from users where active = 1 and deleted_at is null",
+      "name":  "FetchActiveUsers",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "id",
+          "unsigned":  true
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "deleted_at",
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "deleted_at"
+        },
+        {
+          "name":  "name",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "name"
+        },
+        {
+          "name":  "email",
+          "length":  255,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "email"
+        },
+        {
+          "name":  "age",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "age"
+        },
+        {
+          "name":  "active",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "active"
+        },
+        {
+          "name":  "balance",
+          "notNull":  true,
+          "length":  10,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "decimal"
+          },
+          "originalName":  "balance"
+        },
+        {
+          "name":  "score",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "double"
+          },
+          "originalName":  "score"
+        },
+        {
+          "name":  "notes",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "text"
+          },
+          "originalName":  "notes"
+        },
+        {
+          "name":  "avatar",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "blob"
+          },
+          "originalName":  "avatar"
+        },
+        {
+          "name":  "last_login",
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "last_login"
+        }
+      ],
+      "filename":  "users.sql"
+    },
+    {
+      "text":  "select id, created_at, deleted_at, name, email, age, active, balance, score, notes, avatar, last_login from users where email = ?",
+      "name":  "FetchUserByEmail",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "id",
+          "unsigned":  true
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "deleted_at",
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "deleted_at"
+        },
+        {
+          "name":  "name",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "name"
+        },
+        {
+          "name":  "email",
+          "length":  255,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "email"
+        },
+        {
+          "name":  "age",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "int"
+          },
+          "originalName":  "age"
+        },
+        {
+          "name":  "active",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "active"
+        },
+        {
+          "name":  "balance",
+          "notNull":  true,
+          "length":  10,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "decimal"
+          },
+          "originalName":  "balance"
+        },
+        {
+          "name":  "score",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "double"
+          },
+          "originalName":  "score"
+        },
+        {
+          "name":  "notes",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "text"
+          },
+          "originalName":  "notes"
+        },
+        {
+          "name":  "avatar",
+          "length":  -1,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "blob"
+          },
+          "originalName":  "avatar"
+        },
+        {
+          "name":  "last_login",
+          "length":  19,
+          "table":  {
+            "name":  "users"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "last_login"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "email",
+            "length":  255,
+            "table":  {
+              "name":  "users"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "email"
+          }
+        }
+      ],
+      "filename":  "users.sql"
+    },
+    {
+      "text":  "select count(*) from users",
+      "name":  "CountUsers",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "count",
+          "notNull":  true,
+          "length":  -1,
+          "isFuncCall":  true,
+          "type":  {
+            "name":  "bigint"
+          }
+        }
+      ],
+      "filename":  "users.sql"
+    },
+    {
+      "text":  "update users set active = 0 where id = ?",
+      "name":  "DeactivateUser",
+      "cmd":  ":exec",
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "users"
+            },
+            "type":  {
+              "name":  "int"
+            },
+            "originalName":  "id",
+            "unsigned":  true
+          }
+        }
+      ],
+      "filename":  "users.sql"
+    }
+  ],
+  "sqlc_version":  "v1.31.1",
+  "plugin_options":  "eyJtYXhfcGFyYW1zIjozLCJwYWNrYWdlIjoiZGIifQ=="
+}
