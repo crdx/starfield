@@ -161,7 +161,7 @@ func outputMigrationMessage(ok bool, fileName string, message string) {
 		icon = col.Red("𐄂")
 		fileName = col.Red(fileName)
 	}
-	fmt.Printf("%s %s [%s]\n", icon, col.Red(fileName), message)
+	fmt.Printf("%s %s [%s]\n", icon, fileName, message)
 	if !ok {
 		os.Exit(1)
 	}
