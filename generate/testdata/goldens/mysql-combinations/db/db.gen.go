@@ -1724,6 +1724,31 @@ func FindResourceByAPIURL(value string) (*Resource, bool) {
 	return item, true
 }
 
+// FindResourceByAPIURLUnscoped finds an instance (including deleted) of Resource by APIURL.
+func FindResourceByAPIURLUnscoped(value string) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `api_url` = ?", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateAPIURL updates the APIURL field.
 func (self *Resource) UpdateAPIURL(value string) bool {
 	result, err := Exec("update `resources` set `api_url` = ? where id = ?", value, self.ID)
@@ -1823,6 +1848,31 @@ func FindResourcesByPayloadUnscoped(value []byte) []*Resource {
 // FindResourceByPayload finds an instance of Resource by Payload.
 func FindResourceByPayload(value []byte) (*Resource, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ? AND deleted_at IS NULL", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindResourceByPayloadUnscoped finds an instance (including deleted) of Resource by Payload.
+func FindResourceByPayloadUnscoped(value []byte) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ?", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -1952,6 +2002,31 @@ func FindResourcesByOptionalPayloadUnscoped(value sql.Null[string]) []*Resource 
 // FindResourceByOptionalPayload finds an instance of Resource by OptionalPayload.
 func FindResourceByOptionalPayload(value string) (*Resource, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ? AND deleted_at IS NULL", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindResourceByOptionalPayloadUnscoped finds an instance (including deleted) of Resource by OptionalPayload.
+func FindResourceByOptionalPayloadUnscoped(value string) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ?", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2111,6 +2186,31 @@ func FindResourceByRatio(value float64) (*Resource, bool) {
 	return item, true
 }
 
+// FindResourceByRatioUnscoped finds an instance (including deleted) of Resource by Ratio.
+func FindResourceByRatioUnscoped(value float64) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `ratio` = ?", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateRatio updates the Ratio field.
 func (self *Resource) UpdateRatio(value float64) bool {
 	result, err := Exec("update `resources` set `ratio` = ? where id = ?", value, self.ID)
@@ -2232,6 +2332,31 @@ func FindResourceByEnabled(value bool) (*Resource, bool) {
 	return item, true
 }
 
+// FindResourceByEnabledUnscoped finds an instance (including deleted) of Resource by Enabled.
+func FindResourceByEnabledUnscoped(value bool) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `enabled` = ?", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateEnabled updates the Enabled field.
 func (self *Resource) UpdateEnabled(value bool) bool {
 	result, err := Exec("update `resources` set `enabled` = ? where id = ?", value, self.ID)
@@ -2331,6 +2456,31 @@ func FindResourcesByCategoryUnscoped(value any) []*Resource {
 // FindResourceByCategory finds an instance of Resource by Category.
 func FindResourceByCategory(value any) (*Resource, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ? AND deleted_at IS NULL", value)
+	item := new(Resource)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.APIURL,
+		&item.Payload,
+		&item.OptionalPayload,
+		&item.Ratio,
+		&item.Enabled,
+		&item.Category,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindResourceByCategoryUnscoped finds an instance (including deleted) of Resource by Category.
+func FindResourceByCategoryUnscoped(value any) (*Resource, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ?", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,

@@ -1564,6 +1564,34 @@ func FindUserByName(value string) (*User, bool) {
 	return item, true
 }
 
+// FindUserByNameUnscoped finds an instance (including deleted) of User by Name.
+func FindUserByNameUnscoped(value string) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `name` = ?", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateName updates the Name field.
 func (self *User) UpdateName(value string) bool {
 	result, err := Exec("update `users` set `name` = ? where id = ?", value, self.ID)
@@ -1677,6 +1705,34 @@ func FindUsersByEmailUnscoped(value sql.Null[string]) []*User {
 // FindUserByEmail finds an instance of User by Email.
 func FindUserByEmail(value string) (*User, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ? AND deleted_at IS NULL", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindUserByEmailUnscoped finds an instance (including deleted) of User by Email.
+func FindUserByEmailUnscoped(value string) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ?", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1856,6 +1912,34 @@ func FindUserByAge(value int64) (*User, bool) {
 	return item, true
 }
 
+// FindUserByAgeUnscoped finds an instance (including deleted) of User by Age.
+func FindUserByAgeUnscoped(value int64) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `age` = ?", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateAge updates the Age field.
 func (self *User) UpdateAge(value int64) bool {
 	result, err := Exec("update `users` set `age` = ? where id = ?", value, self.ID)
@@ -1977,6 +2061,34 @@ func FindUsersByActiveUnscoped(value bool) []*User {
 // FindUserByActive finds an instance of User by Active.
 func FindUserByActive(value bool) (*User, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ? AND deleted_at IS NULL", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindUserByActiveUnscoped finds an instance (including deleted) of User by Active.
+func FindUserByActiveUnscoped(value bool) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ?", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2132,6 +2244,34 @@ func FindUserByBalance(value string) (*User, bool) {
 	return item, true
 }
 
+// FindUserByBalanceUnscoped finds an instance (including deleted) of User by Balance.
+func FindUserByBalanceUnscoped(value string) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `balance` = ?", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateBalance updates the Balance field.
 func (self *User) UpdateBalance(value string) bool {
 	result, err := Exec("update `users` set `balance` = ? where id = ?", value, self.ID)
@@ -2245,6 +2385,34 @@ func FindUsersByScoreUnscoped(value sql.Null[float64]) []*User {
 // FindUserByScore finds an instance of User by Score.
 func FindUserByScore(value float64) (*User, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ? AND deleted_at IS NULL", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindUserByScoreUnscoped finds an instance (including deleted) of User by Score.
+func FindUserByScoreUnscoped(value float64) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ?", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2424,6 +2592,34 @@ func FindUserByNotes(value string) (*User, bool) {
 	return item, true
 }
 
+// FindUserByNotesUnscoped finds an instance (including deleted) of User by Notes.
+func FindUserByNotesUnscoped(value string) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `notes` = ?", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateNotes updates the Notes field.
 func (self *User) UpdateNotes(value string) bool {
 	result, err := Exec("update `users` set `notes` = ? where id = ?", value, self.ID)
@@ -2578,6 +2774,34 @@ func FindUserByAvatar(value string) (*User, bool) {
 	return item, true
 }
 
+// FindUserByAvatarUnscoped finds an instance (including deleted) of User by Avatar.
+func FindUserByAvatarUnscoped(value string) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `avatar` = ?", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateAvatar updates the Avatar field.
 func (self *User) UpdateAvatar(value string) bool {
 	result, err := Exec("update `users` set `avatar` = ? where id = ?", value, self.ID)
@@ -2707,6 +2931,34 @@ func FindUsersByLastLoginUnscoped(value sql.Null[time.Time]) []*User {
 // FindUserByLastLogin finds an instance of User by LastLogin.
 func FindUserByLastLogin(value time.Time) (*User, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ? AND deleted_at IS NULL", value)
+	item := new(User)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Name,
+		&item.Email,
+		&item.Age,
+		&item.Active,
+		&item.Balance,
+		&item.Score,
+		&item.Notes,
+		&item.Avatar,
+		&item.LastLogin,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindUserByLastLoginUnscoped finds an instance (including deleted) of User by LastLogin.
+func FindUserByLastLoginUnscoped(value time.Time) (*User, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ?", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,

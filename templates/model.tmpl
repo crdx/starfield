@@ -347,6 +347,27 @@
 				return item, true
 			}
 
+			{{ if $hasDeletedAt }}
+				// Find{{ $name }}By{{ .Name }}Unscoped finds an instance (including deleted) of {{ $name }} by {{ .Name }}.
+				func Find{{ $name }}By{{ .Name }}Unscoped(value {{ .BaseType }}) (*{{ $name }}, bool) {
+					row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ?", value)
+					item := new({{ $name }})
+					err := row.Scan(
+						{{- range $fields }}
+							&item.{{ .Name }},
+						{{- end }}
+					)
+					if err == sql.ErrNoRows {
+						return item, false
+					}
+					if err != nil {
+						handleError(err)
+						return nil, false
+					}
+					return item, true
+				}
+			{{ end }}
+
 			{{ if $hasID }}
 				// Update{{ .Name }} updates the {{ .Name }} field.
 				func (self *{{ $name }}) Update{{ .Name }}(value {{ .BaseType }}) bool {

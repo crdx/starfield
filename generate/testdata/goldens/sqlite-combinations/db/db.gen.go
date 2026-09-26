@@ -1223,6 +1223,29 @@ func FindDocumentByBody(value string) (*Document, bool) {
 	return item, true
 }
 
+// FindDocumentByBodyUnscoped finds an instance (including deleted) of Document by Body.
+func FindDocumentByBodyUnscoped(value string) (*Document, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `body` = ?", value)
+	item := new(Document)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Body,
+		&item.Payload,
+		&item.Rank,
+		&item.Active,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateBody updates the Body field.
 func (self *Document) UpdateBody(value string) bool {
 	result, err := Exec("update `documents` set `body` = ? where id = ?", value, self.ID)
@@ -1326,6 +1349,29 @@ func FindDocumentsByPayloadUnscoped(value sql.Null[string]) []*Document {
 // FindDocumentByPayload finds an instance of Document by Payload.
 func FindDocumentByPayload(value string) (*Document, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ? AND deleted_at IS NULL", value)
+	item := new(Document)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Body,
+		&item.Payload,
+		&item.Rank,
+		&item.Active,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindDocumentByPayloadUnscoped finds an instance (including deleted) of Document by Payload.
+func FindDocumentByPayloadUnscoped(value string) (*Document, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ?", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1477,6 +1523,29 @@ func FindDocumentByRank(value float64) (*Document, bool) {
 	return item, true
 }
 
+// FindDocumentByRankUnscoped finds an instance (including deleted) of Document by Rank.
+func FindDocumentByRankUnscoped(value float64) (*Document, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `rank` = ?", value)
+	item := new(Document)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Body,
+		&item.Payload,
+		&item.Rank,
+		&item.Active,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
 // UpdateRank updates the Rank field.
 func (self *Document) UpdateRank(value float64) bool {
 	result, err := Exec("update `documents` set `rank` = ? where id = ?", value, self.ID)
@@ -1572,6 +1641,29 @@ func FindDocumentsByActiveUnscoped(value bool) []*Document {
 // FindDocumentByActive finds an instance of Document by Active.
 func FindDocumentByActive(value bool) (*Document, bool) {
 	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ? AND deleted_at IS NULL", value)
+	item := new(Document)
+	err := row.Scan(
+		&item.ID,
+		&item.CreatedAt,
+		&item.DeletedAt,
+		&item.Body,
+		&item.Payload,
+		&item.Rank,
+		&item.Active,
+	)
+	if err == sql.ErrNoRows {
+		return item, false
+	}
+	if err != nil {
+		handleError(err)
+		return nil, false
+	}
+	return item, true
+}
+
+// FindDocumentByActiveUnscoped finds an instance (including deleted) of Document by Active.
+func FindDocumentByActiveUnscoped(value bool) (*Document, bool) {
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ?", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
