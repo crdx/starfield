@@ -5,7 +5,11 @@ NEW_VERSION="$1"
 
 SEMVER='[0-9]\+\.[0-9]\+\.[0-9]\+'
 
-BANNER_FILES=(templates/header.tmpl generate/testdata/db.gen.go)
+BANNER_FILES=(
+    templates/header.tmpl
+    generate/testdata/db.gen.go
+    generate/testdata/goldens/*/db/db.gen.go
+)
 
 sed -i "s/const Version = \"v${SEMVER}\"/const Version = \"v${NEW_VERSION}\"/g" cmd/starfieldctl/main.go
 

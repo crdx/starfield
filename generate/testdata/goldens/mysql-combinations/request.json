@@ -1,0 +1,964 @@
+{
+  "settings":  {
+    "version":  "2",
+    "engine":  "mysql",
+    "schema":  [
+      "schema"
+    ],
+    "queries":  [
+      "queries"
+    ],
+    "codegen":  {
+      "out":  "db",
+      "plugin":  "starfield-capture",
+      "options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIiLCJwcmVzZXJ2ZSI6WyJtZXRhZGF0YSJdLCJyZW5hbWUiOnsiYXBpX3VybCI6IkFQSVVSTCJ9fQ==",
+      "process":  {
+        "cmd":  "/tmp/starfield-capture"
+      }
+    }
+  },
+  "catalog":  {
+    "defaultSchema":  "public",
+    "schemas":  [
+      {
+        "name":  "public",
+        "tables":  [
+          {
+            "rel":  {
+              "name":  "resources"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "bigint"
+                }
+              },
+              {
+                "name":  "created_at",
+                "notNull":  true,
+                "length":  19,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              },
+              {
+                "name":  "deleted_at",
+                "length":  19,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              },
+              {
+                "name":  "api_url",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "payload",
+                "notNull":  true,
+                "length":  16,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "binary"
+                }
+              },
+              {
+                "name":  "optional_payload",
+                "length":  -1,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "blob"
+                }
+              },
+              {
+                "name":  "ratio",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "float"
+                }
+              },
+              {
+                "name":  "enabled",
+                "notNull":  true,
+                "length":  1,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              },
+              {
+                "name":  "category",
+                "notNull":  true,
+                "length":  5,
+                "table":  {
+                  "name":  "resources"
+                },
+                "type":  {
+                  "name":  "resources_category"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "audit_entries"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "audit_entries"
+                },
+                "type":  {
+                  "name":  "bigint"
+                }
+              },
+              {
+                "name":  "occurred_on",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "audit_entries"
+                },
+                "type":  {
+                  "name":  "date"
+                }
+              },
+              {
+                "name":  "duration",
+                "length":  10,
+                "table":  {
+                  "name":  "audit_entries"
+                },
+                "type":  {
+                  "name":  "time"
+                }
+              },
+              {
+                "name":  "year_value",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "audit_entries"
+                },
+                "type":  {
+                  "name":  "year"
+                }
+              },
+              {
+                "name":  "description",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "audit_entries"
+                },
+                "type":  {
+                  "name":  "text"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "metadata"
+            },
+            "columns":  [
+              {
+                "name":  "code",
+                "notNull":  true,
+                "length":  4,
+                "table":  {
+                  "name":  "metadata"
+                },
+                "type":  {
+                  "name":  "char"
+                }
+              },
+              {
+                "name":  "value",
+                "length":  -1,
+                "table":  {
+                  "name":  "metadata"
+                },
+                "type":  {
+                  "name":  "text"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "resources_view"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "resources_view"
+                },
+                "type":  {
+                  "name":  "bigint"
+                }
+              },
+              {
+                "name":  "api_url",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "resources_view"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "enabled",
+                "notNull":  true,
+                "length":  1,
+                "table":  {
+                  "name":  "resources_view"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              }
+            ]
+          }
+        ],
+        "enums":  [
+          {
+            "name":  "resources_category",
+            "vals":  [
+              "alpha",
+              "beta"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "queries":  [
+    {
+      "text":  "select id, created_at, deleted_at, api_url, payload, optional_payload, ratio, enabled, category from resources where deleted_at is null order by id",
+      "name":  "ListResources",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "bigint"
+          },
+          "originalName":  "id"
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "deleted_at",
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "deleted_at"
+        },
+        {
+          "name":  "api_url",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "api_url"
+        },
+        {
+          "name":  "payload",
+          "notNull":  true,
+          "length":  16,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "binary"
+          },
+          "originalName":  "payload"
+        },
+        {
+          "name":  "optional_payload",
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "blob"
+          },
+          "originalName":  "optional_payload"
+        },
+        {
+          "name":  "ratio",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "float"
+          },
+          "originalName":  "ratio"
+        },
+        {
+          "name":  "enabled",
+          "notNull":  true,
+          "length":  1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "enabled"
+        },
+        {
+          "name":  "category",
+          "notNull":  true,
+          "length":  5,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "resources_category"
+          },
+          "originalName":  "category"
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "select api_url from resources where deleted_at is null order by id",
+      "name":  "ListResourceURLs",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "api_url",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "api_url"
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "select id, api_url from resources where id = ?",
+      "name":  "FindResourceSummary",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "bigint"
+          },
+          "originalName":  "id"
+        },
+        {
+          "name":  "api_url",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "api_url"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "bigint"
+            },
+            "originalName":  "id"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "select count(*) from resources where deleted_at is null",
+      "name":  "CountResources",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "count",
+          "notNull":  true,
+          "length":  -1,
+          "isFuncCall":  true,
+          "type":  {
+            "name":  "bigint"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "select id, created_at, deleted_at, api_url, payload, optional_payload, ratio, enabled, category from resources\nwhere enabled = ? and category = ? and api_url like ?\norder by id",
+      "name":  "SearchResources",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "bigint"
+          },
+          "originalName":  "id"
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "deleted_at",
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "deleted_at"
+        },
+        {
+          "name":  "api_url",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "api_url"
+        },
+        {
+          "name":  "payload",
+          "notNull":  true,
+          "length":  16,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "binary"
+          },
+          "originalName":  "payload"
+        },
+        {
+          "name":  "optional_payload",
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "blob"
+          },
+          "originalName":  "optional_payload"
+        },
+        {
+          "name":  "ratio",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "float"
+          },
+          "originalName":  "ratio"
+        },
+        {
+          "name":  "enabled",
+          "notNull":  true,
+          "length":  1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "enabled"
+        },
+        {
+          "name":  "category",
+          "notNull":  true,
+          "length":  5,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "resources_category"
+          },
+          "originalName":  "category"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "enabled",
+            "notNull":  true,
+            "length":  1,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "tinyint"
+            },
+            "originalName":  "enabled"
+          }
+        },
+        {
+          "number":  2,
+          "column":  {
+            "name":  "category",
+            "notNull":  true,
+            "length":  5,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "resources_category"
+            },
+            "originalName":  "category"
+          }
+        },
+        {
+          "number":  3,
+          "column":  {
+            "name":  "api_url",
+            "notNull":  true,
+            "length":  255,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "api_url"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "select id, created_at, deleted_at, api_url, payload, optional_payload, ratio, enabled, category from resources\nwhere id in (/*SLICE:ids*/?)\norder by id",
+      "name":  "FindResourcesByIDs",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "id",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "bigint"
+          },
+          "originalName":  "id"
+        },
+        {
+          "name":  "created_at",
+          "notNull":  true,
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "created_at"
+        },
+        {
+          "name":  "deleted_at",
+          "length":  19,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "datetime"
+          },
+          "originalName":  "deleted_at"
+        },
+        {
+          "name":  "api_url",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "api_url"
+        },
+        {
+          "name":  "payload",
+          "notNull":  true,
+          "length":  16,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "binary"
+          },
+          "originalName":  "payload"
+        },
+        {
+          "name":  "optional_payload",
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "blob"
+          },
+          "originalName":  "optional_payload"
+        },
+        {
+          "name":  "ratio",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "float"
+          },
+          "originalName":  "ratio"
+        },
+        {
+          "name":  "enabled",
+          "notNull":  true,
+          "length":  1,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "tinyint"
+          },
+          "originalName":  "enabled"
+        },
+        {
+          "name":  "category",
+          "notNull":  true,
+          "length":  5,
+          "table":  {
+            "name":  "resources"
+          },
+          "type":  {
+            "name":  "resources_category"
+          },
+          "originalName":  "category"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "ids",
+            "notNull":  true,
+            "length":  -1,
+            "isNamedParam":  true,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "bigint"
+            },
+            "isSqlcSlice":  true,
+            "originalName":  "id"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "update resources\nset api_url = ?, enabled = ?\nwhere id = ?",
+      "name":  "UpdateResource",
+      "cmd":  ":execrows",
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "api_url",
+            "notNull":  true,
+            "length":  255,
+            "isNamedParam":  true,
+            "table":  {
+              "schema":  "public",
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "api_url"
+          }
+        },
+        {
+          "number":  2,
+          "column":  {
+            "name":  "enabled",
+            "notNull":  true,
+            "length":  1,
+            "isNamedParam":  true,
+            "table":  {
+              "schema":  "public",
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "tinyint"
+            },
+            "originalName":  "enabled"
+          }
+        },
+        {
+          "number":  3,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "isNamedParam":  true,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "bigint"
+            },
+            "originalName":  "id"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "update resources set enabled = false where id = ?",
+      "name":  "DisableResource",
+      "cmd":  ":exec",
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "resources"
+            },
+            "type":  {
+              "name":  "bigint"
+            },
+            "originalName":  "id"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    },
+    {
+      "text":  "insert into audit_entries (occurred_on, duration, year_value, description)\nvalues (?, ?, ?, ?)",
+      "name":  "InsertAuditEntry",
+      "cmd":  ":execlastid",
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "occurred_on",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "schema":  "public",
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "date"
+            },
+            "originalName":  "occurred_on"
+          }
+        },
+        {
+          "number":  2,
+          "column":  {
+            "name":  "duration",
+            "length":  10,
+            "table":  {
+              "schema":  "public",
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "time"
+            },
+            "originalName":  "duration"
+          }
+        },
+        {
+          "number":  3,
+          "column":  {
+            "name":  "year_value",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "schema":  "public",
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "year"
+            },
+            "originalName":  "year_value"
+          }
+        },
+        {
+          "number":  4,
+          "column":  {
+            "name":  "description",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "schema":  "public",
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "text"
+            },
+            "originalName":  "description"
+          }
+        }
+      ],
+      "filename":  "commands.sql",
+      "insert_into_table":  {
+        "name":  "audit_entries"
+      }
+    },
+    {
+      "text":  "update audit_entries set description = ? where id = ?",
+      "name":  "TouchAuditEntry",
+      "cmd":  ":execresult",
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "description",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "schema":  "public",
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "text"
+            },
+            "originalName":  "description"
+          }
+        },
+        {
+          "number":  2,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "audit_entries"
+            },
+            "type":  {
+              "name":  "bigint"
+            },
+            "originalName":  "id"
+          }
+        }
+      ],
+      "filename":  "commands.sql"
+    }
+  ],
+  "sqlc_version":  "v1.31.1",
+  "plugin_options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIiLCJwcmVzZXJ2ZSI6WyJtZXRhZGF0YSJdLCJyZW5hbWUiOnsiYXBpX3VybCI6IkFQSVVSTCJ9fQ=="
+}

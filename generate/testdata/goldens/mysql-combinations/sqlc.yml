@@ -1,0 +1,20 @@
+version: '2'
+sql:
+  - name: mysql-combinations
+    engine: mysql
+    queries: queries
+    schema: schema
+    codegen:
+      - plugin: starfield-capture
+        out: db
+        options:
+          package: db
+          max_params: 2
+          preserve:
+            - metadata
+          rename:
+            api_url: APIURL
+plugins:
+  - name: starfield-capture
+    process:
+      cmd: starfield

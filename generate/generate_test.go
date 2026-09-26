@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var update = flag.Bool("update", false, "regenerate the test fixture")
+var update = flag.Bool("update", false, "regenerate the golden test fixtures")
 
 const (
 	requestPath = "testdata/request.json"
@@ -25,9 +25,37 @@ const (
 	fixtureFile = "db.gen.go"
 )
 
-func TestGenerate(t *testing.T) {
-	request := getRequest(t)
+type goldenTest struct {
+	Name        string
+	RequestPath string
+	FixturePath string
+}
 
+var goldenTests = []goldenTest{
+	{
+		Name:        "mysql-models",
+		RequestPath: requestPath,
+		FixturePath: fixturePath,
+	},
+	{
+		Name:        "mysql-combinations",
+		RequestPath: "testdata/goldens/mysql-combinations/request.json",
+		FixturePath: "testdata/goldens/mysql-combinations/db/db.gen.go",
+	},
+}
+
+func TestGenerate(t *testing.T) {
+	for _, golden := range goldenTests {
+		t.Run(golden.Name, func(t *testing.T) {
+			testGenerateGolden(t, golden)
+		})
+	}
+}
+
+func testGenerateGolden(t *testing.T, golden goldenTest) {
+	t.Helper()
+
+	request := getRequestFromPath(t, golden.RequestPath)
 	response, err := Run(context.Background(), request)
 	require.NoError(t, err)
 
@@ -35,28 +63,26 @@ func TestGenerate(t *testing.T) {
 	require.Equal(t, fixtureFile, response.Files[0].Name)
 
 	code := response.Files[0].Contents
-
 	if *update {
-		require.NoError(t, os.WriteFile(fixturePath, code, 0o600))
+		require.NoError(t, os.WriteFile(golden.FixturePath, code, 0o600))
 	}
 
-	expected, err := os.ReadFile(fixturePath)
+	expected, err := os.ReadFile(golden.FixturePath)
 	require.NoError(t, err)
-
 	if !bytes.Equal(expected, code) {
 		t.Errorf(
 			"generated output does not match %s. ensure working tree is clean, then rerun with -update to see what changes",
-			fixturePath,
+			golden.FixturePath,
 		)
 	}
 
 	assertCompiles(t, code)
 }
 
-func getRequest(t *testing.T) *plugin.GenerateRequest {
+func getRequestFromPath(t *testing.T, path string) *plugin.GenerateRequest {
 	t.Helper()
 
-	contents, err := os.ReadFile(requestPath)
+	contents, err := os.ReadFile(path) //nolint:gosec // Golden paths are fixed by this package.
 	require.NoError(t, err)
 
 	var request plugin.GenerateRequest
