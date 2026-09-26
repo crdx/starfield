@@ -8,7 +8,8 @@ linters:
     - dupword
     - err113
     - exhaustive
-    - exhaustruct
+    - exhaustruct # deprecated: replaced by exhaustruct_v5 (enabled via default: all)
+    - exhaustruct_v5
     - forbidigo
     - funlen
     - gochecknoglobals
