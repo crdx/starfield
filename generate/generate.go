@@ -20,6 +20,7 @@ type TemplateArgs struct {
 	Structs    []Struct
 	Queries    []Query
 	Version    string
+	Engine     string
 	SourceName string
 	Imports    []string
 }
@@ -92,6 +93,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 		Structs: structs,
 		Imports: imports,
 		Version: req.SqlcVersion,
+		Engine:  req.Settings.Engine,
 	}
 
 	var snippets [][]byte

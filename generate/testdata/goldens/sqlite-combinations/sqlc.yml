@@ -1,0 +1,13 @@
+version: '2'
+sql:
+  - name: sqlite-combinations
+    engine: sqlite
+    queries: queries
+    schema: schema
+    codegen:
+      - plugin: starfield-capture
+        out: db
+plugins:
+  - name: starfield-capture
+    process:
+      cmd: starfield

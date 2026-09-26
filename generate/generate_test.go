@@ -42,6 +42,11 @@ var goldenTests = []goldenTest{
 		RequestPath: "testdata/goldens/mysql-combinations/request.json",
 		FixturePath: "testdata/goldens/mysql-combinations/db/db.gen.go",
 	},
+	{
+		Name:        "sqlite-combinations",
+		RequestPath: "testdata/goldens/sqlite-combinations/request.json",
+		FixturePath: "testdata/goldens/sqlite-combinations/db/db.gen.go",
+	},
 }
 
 func TestGenerate(t *testing.T) {

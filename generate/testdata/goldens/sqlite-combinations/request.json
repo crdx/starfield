@@ -1,0 +1,540 @@
+{
+  "settings": {
+    "version": "2",
+    "engine": "sqlite",
+    "schema": [
+      "schema"
+    ],
+    "queries": [
+      "queries"
+    ],
+    "codegen": {
+      "out": "db",
+      "plugin": "starfield-capture",
+      "process": {
+        "cmd": "/tmp/starfield-capture"
+      }
+    }
+  },
+  "catalog": {
+    "defaultSchema": "main",
+    "schemas": [
+      {
+        "name": "main",
+        "tables": [
+          {
+            "rel": {
+              "name": "documents"
+            },
+            "columns": [
+              {
+                "name": "id",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "integer"
+                }
+              },
+              {
+                "name": "created_at",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "datetime"
+                }
+              },
+              {
+                "name": "deleted_at",
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "datetime"
+                }
+              },
+              {
+                "name": "body",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "text"
+                }
+              },
+              {
+                "name": "payload",
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "blob"
+                }
+              },
+              {
+                "name": "rank",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "real"
+                }
+              },
+              {
+                "name": "active",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "documents"
+                },
+                "type": {
+                  "name": "boolean"
+                }
+              }
+            ]
+          },
+          {
+            "rel": {
+              "name": "counters"
+            },
+            "columns": [
+              {
+                "name": "name",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "counters"
+                },
+                "type": {
+                  "name": "text"
+                }
+              },
+              {
+                "name": "value",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "counters"
+                },
+                "type": {
+                  "name": "integer"
+                }
+              }
+            ]
+          },
+          {
+            "rel": {
+              "name": "document_summaries_view"
+            },
+            "columns": [
+              {
+                "name": "id",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "document_summaries_view"
+                },
+                "type": {
+                  "name": "integer"
+                }
+              },
+              {
+                "name": "body",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "document_summaries_view"
+                },
+                "type": {
+                  "name": "text"
+                }
+              },
+              {
+                "name": "active",
+                "notNull": true,
+                "length": -1,
+                "table": {
+                  "name": "document_summaries_view"
+                },
+                "type": {
+                  "name": "boolean"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "queries": [
+    {
+      "text": "select id, created_at, deleted_at, body, payload, rank, active from documents where deleted_at is null order by id",
+      "name": "ListDocuments",
+      "cmd": ":many",
+      "columns": [
+        {
+          "name": "id",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "integer"
+          },
+          "originalName": "id"
+        },
+        {
+          "name": "created_at",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "datetime"
+          },
+          "originalName": "created_at"
+        },
+        {
+          "name": "deleted_at",
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "datetime"
+          },
+          "originalName": "deleted_at"
+        },
+        {
+          "name": "body",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "text"
+          },
+          "originalName": "body"
+        },
+        {
+          "name": "payload",
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "blob"
+          },
+          "originalName": "payload"
+        },
+        {
+          "name": "rank",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "real"
+          },
+          "originalName": "rank"
+        },
+        {
+          "name": "active",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "boolean"
+          },
+          "originalName": "active"
+        }
+      ],
+      "filename": "commands.sql"
+    },
+    {
+      "text": "select body from documents where id = ?",
+      "name": "FindDocumentBody",
+      "cmd": ":one",
+      "columns": [
+        {
+          "name": "body",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "text"
+          },
+          "originalName": "body"
+        }
+      ],
+      "parameters": [
+        {
+          "number": 1,
+          "column": {
+            "name": "id",
+            "notNull": true,
+            "length": -1,
+            "table": {
+              "name": "documents"
+            },
+            "type": {
+              "name": "integer"
+            },
+            "originalName": "id"
+          }
+        }
+      ],
+      "filename": "commands.sql"
+    },
+    {
+      "text": "select id, created_at, deleted_at, body, payload, rank, active from documents\nwhere id in (/*SLICE:ids*/?)\norder by id",
+      "name": "FindDocumentsByIDs",
+      "cmd": ":many",
+      "columns": [
+        {
+          "name": "id",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "integer"
+          },
+          "originalName": "id"
+        },
+        {
+          "name": "created_at",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "datetime"
+          },
+          "originalName": "created_at"
+        },
+        {
+          "name": "deleted_at",
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "datetime"
+          },
+          "originalName": "deleted_at"
+        },
+        {
+          "name": "body",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "text"
+          },
+          "originalName": "body"
+        },
+        {
+          "name": "payload",
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "blob"
+          },
+          "originalName": "payload"
+        },
+        {
+          "name": "rank",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "real"
+          },
+          "originalName": "rank"
+        },
+        {
+          "name": "active",
+          "notNull": true,
+          "length": -1,
+          "table": {
+            "name": "documents"
+          },
+          "type": {
+            "name": "boolean"
+          },
+          "originalName": "active"
+        }
+      ],
+      "parameters": [
+        {
+          "number": 1,
+          "column": {
+            "name": "ids",
+            "notNull": true,
+            "length": -1,
+            "isNamedParam": true,
+            "table": {
+              "name": "documents"
+            },
+            "type": {
+              "name": "integer"
+            },
+            "isSqlcSlice": true,
+            "originalName": "id"
+          }
+        }
+      ],
+      "filename": "commands.sql"
+    },
+    {
+      "text": "update documents\nset body = ?1, rank = ?2, active = ?3\nwhere id = ?4",
+      "name": "UpdateDocument",
+      "cmd": ":execrows",
+      "parameters": [
+        {
+          "number": 1,
+          "column": {
+            "name": "body",
+            "notNull": true,
+            "length": -1,
+            "isNamedParam": true,
+            "table": {
+              "schema": "main",
+              "name": "documents"
+            },
+            "type": {
+              "name": "text"
+            },
+            "originalName": "body"
+          }
+        },
+        {
+          "number": 2,
+          "column": {
+            "name": "rank",
+            "notNull": true,
+            "length": -1,
+            "isNamedParam": true,
+            "table": {
+              "schema": "main",
+              "name": "documents"
+            },
+            "type": {
+              "name": "real"
+            },
+            "originalName": "rank"
+          }
+        },
+        {
+          "number": 3,
+          "column": {
+            "name": "active",
+            "notNull": true,
+            "length": -1,
+            "isNamedParam": true,
+            "table": {
+              "schema": "main",
+              "name": "documents"
+            },
+            "type": {
+              "name": "boolean"
+            },
+            "originalName": "active"
+          }
+        },
+        {
+          "number": 4,
+          "column": {
+            "name": "id",
+            "notNull": true,
+            "length": -1,
+            "isNamedParam": true,
+            "table": {
+              "name": "documents"
+            },
+            "type": {
+              "name": "integer"
+            },
+            "originalName": "id"
+          }
+        }
+      ],
+      "filename": "commands.sql"
+    },
+    {
+      "text": "delete from counters where name = ?",
+      "name": "DeleteCounter",
+      "cmd": ":exec",
+      "parameters": [
+        {
+          "number": 1,
+          "column": {
+            "name": "name",
+            "notNull": true,
+            "length": -1,
+            "table": {
+              "name": "counters"
+            },
+            "type": {
+              "name": "text"
+            },
+            "originalName": "name"
+          }
+        }
+      ],
+      "filename": "commands.sql"
+    },
+    {
+      "text": "update counters set value = value + 1 where name = ?",
+      "name": "IncrementCounter",
+      "cmd": ":execresult",
+      "parameters": [
+        {
+          "number": 1,
+          "column": {
+            "name": "name",
+            "notNull": true,
+            "length": -1,
+            "table": {
+              "name": "counters"
+            },
+            "type": {
+              "name": "text"
+            },
+            "originalName": "name"
+          }
+        }
+      ],
+      "filename": "commands.sql"
+    }
+  ],
+  "sqlc_version": "v1.31.1"
+}
