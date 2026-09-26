@@ -1361,7 +1361,7 @@ func FindMetadataByValue(value string) (*Metadata, bool) {
 
 type Resource struct {
 	ID              int64               `column:"id"`
-	CreatedAt       time.Time           `column:"created_at"`
+	CreatedAt       sql.Null[time.Time] `column:"created_at"`
 	DeletedAt       sql.Null[time.Time] `column:"deleted_at"`
 	APIURL          string              `column:"api_url"`
 	Payload         []byte              `column:"payload"`
@@ -1408,9 +1408,10 @@ func GetResourceTableStatus() (TableStatus, error) {
 
 // CreateResource creates a new instance of Resource.
 func CreateResource(value *Resource) *Resource {
-	if value.CreatedAt.IsZero() {
-		value.CreatedAt = Now()
+	if !value.CreatedAt.Valid || value.CreatedAt.V.IsZero() {
+		value.CreatedAt = N(Now())
 	}
+
 	result, err := Exec("insert into `resources` (`id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category`) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		value.ID,
 		value.CreatedAt,

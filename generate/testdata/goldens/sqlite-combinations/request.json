@@ -40,7 +40,6 @@
               },
               {
                 "name": "created_at",
-                "notNull": true,
                 "length": -1,
                 "table": {
                   "name": "documents"
@@ -197,7 +196,6 @@
         },
         {
           "name": "created_at",
-          "notNull": true,
           "length": -1,
           "table": {
             "name": "documents"
@@ -324,7 +322,6 @@
         },
         {
           "name": "created_at",
-          "notNull": true,
           "length": -1,
           "table": {
             "name": "documents"

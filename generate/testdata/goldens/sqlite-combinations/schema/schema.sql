@@ -1,6 +1,6 @@
 create table documents (
     id integer not null primary key,
-    created_at datetime not null,
+    created_at datetime,
     deleted_at datetime,
     body text not null,
     payload blob,

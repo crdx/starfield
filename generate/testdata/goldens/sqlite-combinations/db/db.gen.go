@@ -880,7 +880,7 @@ func FindCounterByValue(value int64) (*Counter, bool) {
 
 type Document struct {
 	ID        int64               `column:"id"`
-	CreatedAt time.Time           `column:"created_at"`
+	CreatedAt sql.Null[time.Time] `column:"created_at"`
 	DeletedAt sql.Null[time.Time] `column:"deleted_at"`
 	Body      string              `column:"body"`
 	Payload   sql.Null[string]    `column:"payload"`
@@ -925,9 +925,10 @@ func GetDocumentTableStatus() (TableStatus, error) {
 
 // CreateDocument creates a new instance of Document.
 func CreateDocument(value *Document) *Document {
-	if value.CreatedAt.IsZero() {
-		value.CreatedAt = Now()
+	if !value.CreatedAt.Valid || value.CreatedAt.V.IsZero() {
+		value.CreatedAt = N(Now())
 	}
+
 	result, err := Exec("insert into `documents` (`id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active`) values (?, ?, ?, ?, ?, ?, ?)",
 		value.ID,
 		value.CreatedAt,
