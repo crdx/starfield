@@ -1,5 +1,5 @@
 create table resources (
-    id bigint signed not null auto_increment primary key,
+    id varchar(36) not null primary key,
     created_at datetime default null,
     deleted_at datetime default null,
     api_url varchar(255) not null,

@@ -5,6 +5,7 @@
 	{{ $hasDeletedAt := .HasDeletedAt }}
 	{{ $hasCreatedAt := .HasCreatedAt }}
 	{{ $hasID := .HasID }}
+	{{ $hasIntegerID := .HasIntegerID }}
 	{{ $fields := .Fields }}
 
 	// Get{{ $name }}TableStatus returns the TableStatus for the {{ toPlural $name }} table.
@@ -55,7 +56,7 @@
 				}
 			{{- end }}
 		{{ end -}}
-		{{ if $hasID }}result{{ else }}_{{ end }}, err := Exec("insert into `{{ $table.Name }}` ({{ $fieldNames }}) values ({{ .Placeholders }})",
+		{{ if $hasIntegerID }}result{{ else }}_{{ end }}, err := Exec("insert into `{{ $table.Name }}` ({{ $fieldNames }}) values ({{ .Placeholders }})",
 			{{- range $fields }}
 				value.{{ .Name }},
 			{{- end }}
@@ -64,13 +65,15 @@
 			handleError(err)
 			return nil
 		}
-		{{ if $hasID }}
-			lastInsertID, err := result.LastInsertId()
-			if err != nil {
-				handleError(err)
-				return nil
+		{{ if $hasIntegerID }}
+			if value.ID == 0 {
+				lastInsertID, err := result.LastInsertId()
+				if err != nil {
+					handleError(err)
+					return nil
+				}
+				{{ if .HasUnsignedID }}value.ID = uint64(lastInsertID){{ else }}value.ID = lastInsertID{{ end }}
 			}
-			{{ if .HasUnsignedID }}value.ID = uint64(lastInsertID){{ else }}value.ID = lastInsertID{{ end }}
 		{{ end }}
 		return value
 	}

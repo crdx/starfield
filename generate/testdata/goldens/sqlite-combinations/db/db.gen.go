@@ -879,7 +879,7 @@ func FindCounterByValue(value int64) (*Counter, bool) {
 }
 
 type Document struct {
-	ID        int64               `column:"id"`
+	ID        string              `column:"id"`
 	CreatedAt sql.Null[time.Time] `column:"created_at"`
 	DeletedAt sql.Null[time.Time] `column:"deleted_at"`
 	Body      string              `column:"body"`
@@ -929,7 +929,7 @@ func CreateDocument(value *Document) *Document {
 		value.CreatedAt = N(Now())
 	}
 
-	result, err := Exec("insert into `documents` (`id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active`) values (?, ?, ?, ?, ?, ?, ?)",
+	_, err := Exec("insert into `documents` (`id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active`) values (?, ?, ?, ?, ?, ?, ?)",
 		value.ID,
 		value.CreatedAt,
 		value.DeletedAt,
@@ -942,13 +942,6 @@ func CreateDocument(value *Document) *Document {
 		handleError(err)
 		return nil
 	}
-
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		handleError(err)
-		return nil
-	}
-	value.ID = lastInsertID
 
 	return value
 }
@@ -1608,7 +1601,7 @@ func (self *Document) UpdateActive(value bool) bool {
 }
 
 type DocumentSummariesView struct {
-	ID     int64  `column:"id"`
+	ID     string `column:"id"`
 	Body   string `column:"body"`
 	Active bool   `column:"active"`
 }
@@ -1636,7 +1629,7 @@ select body from documents where id = ?
 // FindDocumentBody runs an SQL query.
 //
 // select body from documents where id = ?
-func FindDocumentBody(id int64) (string, bool) {
+func FindDocumentBody(id string) (string, bool) {
 	row := QueryRow(findDocumentBody, id)
 	var body string
 	err := row.Scan(&body)
@@ -1660,7 +1653,7 @@ order by id
 // FindDocumentsByIDs runs an SQL query.
 //
 // select id, created_at, deleted_at, body, payload, rank, active from documents where id in (/*SLICE:ids*/?) order by id
-func FindDocumentsByIDs(ids []int64) []*Document {
+func FindDocumentsByIDs(ids []string) []*Document {
 	q := findDocumentsByIDs
 	var queryParams []any
 	if len(ids) > 0 {
@@ -1778,7 +1771,7 @@ type UpdateDocumentParams struct {
 	Body   string
 	Rank   float64
 	Active bool
-	ID     int64
+	ID     string
 }
 
 // UpdateDocument runs an SQL query.

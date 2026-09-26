@@ -768,12 +768,14 @@ func CreatePost(value *Post) *Post {
 		return nil
 	}
 
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		handleError(err)
-		return nil
+	if value.ID == 0 {
+		lastInsertID, err := result.LastInsertId()
+		if err != nil {
+			handleError(err)
+			return nil
+		}
+		value.ID = uint64(lastInsertID)
 	}
-	value.ID = uint64(lastInsertID)
 
 	return value
 }
@@ -1238,12 +1240,14 @@ func CreateUser(value *User) *User {
 		return nil
 	}
 
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		handleError(err)
-		return nil
+	if value.ID == 0 {
+		lastInsertID, err := result.LastInsertId()
+		if err != nil {
+			handleError(err)
+			return nil
+		}
+		value.ID = uint64(lastInsertID)
 	}
-	value.ID = uint64(lastInsertID)
 
 	return value
 }

@@ -763,12 +763,14 @@ func CreateAuditEntry(value *AuditEntry) *AuditEntry {
 		return nil
 	}
 
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		handleError(err)
-		return nil
+	if value.ID == 0 {
+		lastInsertID, err := result.LastInsertId()
+		if err != nil {
+			handleError(err)
+			return nil
+		}
+		value.ID = lastInsertID
 	}
-	value.ID = lastInsertID
 
 	return value
 }
@@ -1360,7 +1362,7 @@ func FindMetadataByValue(value string) (*Metadata, bool) {
 }
 
 type Resource struct {
-	ID              int64               `column:"id"`
+	ID              string              `column:"id"`
 	CreatedAt       sql.Null[time.Time] `column:"created_at"`
 	DeletedAt       sql.Null[time.Time] `column:"deleted_at"`
 	APIURL          string              `column:"api_url"`
@@ -1412,7 +1414,7 @@ func CreateResource(value *Resource) *Resource {
 		value.CreatedAt = N(Now())
 	}
 
-	result, err := Exec("insert into `resources` (`id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category`) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+	_, err := Exec("insert into `resources` (`id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category`) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		value.ID,
 		value.CreatedAt,
 		value.DeletedAt,
@@ -1427,13 +1429,6 @@ func CreateResource(value *Resource) *Resource {
 		handleError(err)
 		return nil
 	}
-
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		handleError(err)
-		return nil
-	}
-	value.ID = lastInsertID
 
 	return value
 }
@@ -2367,7 +2362,7 @@ func (self *Resource) UpdateCategory(value any) bool {
 }
 
 type ResourcesView struct {
-	ID      int64  `column:"id"`
+	ID      string `column:"id"`
 	APIURL  string `column:"api_url"`
 	Enabled bool   `column:"enabled"`
 }
@@ -2402,7 +2397,7 @@ update resources set enabled = false where id = ?
 // DisableResource runs an SQL query.
 //
 // update resources set enabled = false where id = ?
-func DisableResource(id int64) {
+func DisableResource(id string) {
 	_, err := Exec(disableResource, id)
 	if err != nil {
 		handleError(err)
@@ -2415,14 +2410,14 @@ select id, api_url from resources where id = ?
 `
 
 type FindResourceSummaryRow struct {
-	ID     int64
+	ID     string
 	APIURL string
 }
 
 // FindResourceSummary runs an SQL query.
 //
 // select id, api_url from resources where id = ?
-func FindResourceSummary(id int64) (*FindResourceSummaryRow, bool) {
+func FindResourceSummary(id string) (*FindResourceSummaryRow, bool) {
 	row := QueryRow(findResourceSummary, id)
 	item := new(FindResourceSummaryRow)
 
@@ -2447,7 +2442,7 @@ order by id
 // FindResourcesByIDs runs an SQL query.
 //
 // select id, created_at, deleted_at, api_url, payload, optional_payload, ratio, enabled, category from resources where id in (/*SLICE:ids*/?) order by id
-func FindResourcesByIDs(ids []int64) []*Resource {
+func FindResourcesByIDs(ids []string) []*Resource {
 	q := findResourcesByIDs
 	var queryParams []any
 	if len(ids) > 0 {
@@ -2697,7 +2692,7 @@ where id = ?
 type UpdateResourceParams struct {
 	APIURL  string
 	Enabled bool
-	ID      int64
+	ID      string
 }
 
 // UpdateResource runs an SQL query.
