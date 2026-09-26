@@ -152,15 +152,15 @@ func mergeImports(imports ...FileImports) [][]string {
 	var stds, pkgs []string
 	seenStd := map[string]bool{}
 	seenPkg := map[string]bool{}
-	for i := range imports {
-		for _, path := range imports[i].Std {
+	for _, importSet := range imports {
+		for _, path := range importSet.Std {
 			if _, ok := seenStd[path]; ok {
 				continue
 			}
 			stds = append(stds, path)
 			seenStd[path] = true
 		}
-		for _, path := range imports[i].Dep {
+		for _, path := range importSet.Dep {
 			if _, ok := seenPkg[path]; ok {
 				continue
 			}

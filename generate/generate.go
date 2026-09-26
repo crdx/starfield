@@ -1,7 +1,6 @@
 package generate
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -103,18 +102,12 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 			return item.SourceName == file.Name
 		})
 
-		var buf bytes.Buffer
-		writer := bufio.NewWriter(&buf)
-
-		if err := templateEngine.ExecuteTemplate(writer, file.Template, &args); err != nil {
+		var buffer bytes.Buffer
+		if err := templateEngine.ExecuteTemplate(&buffer, file.Template, &args); err != nil {
 			return err
 		}
 
-		if err := writer.Flush(); err != nil {
-			return err
-		}
-
-		code, err := format.Source(buf.Bytes())
+		code, err := format.Source(buffer.Bytes())
 		if err != nil {
 			return fmt.Errorf("unable to format %s from template %s: %w", file.Name, file.Template, err)
 		}
@@ -129,10 +122,7 @@ func generate(req *plugin.GenerateRequest, options *Options, structs []Struct, q
 		}
 	}
 
-	code, err := format.Source(bytes.Join(snippets, []byte("\n")))
-	if err != nil {
-		return nil, fmt.Errorf("unable to format main file: %w", err)
-	}
+	code := lo.Must(format.Source(bytes.Join(snippets, []byte("\n"))))
 
 	response := plugin.GenerateResponse{}
 	response.Files = append(response.Files, &plugin.File{

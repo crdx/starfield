@@ -79,13 +79,6 @@ func (self QueryValue) Pairs() []Argument {
 	}
 }
 
-func (self QueryValue) SlicePair() string {
-	if self.isEmpty() {
-		return ""
-	}
-	return self.Name + " []" + self.DefineType()
-}
-
 func (self QueryValue) Type() string {
 	if self.Typ != "" {
 		return self.Typ

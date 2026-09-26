@@ -2,16 +2,13 @@ package generate
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/inflection"
-	"github.com/samber/lo"
 	"github.com/sqlc-dev/plugin-sdk-go/plugin"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -69,20 +66,6 @@ func hasPrefixIgnoringSliceAndPointerPrefix(s string, prefix string) bool {
 	trimmedS := trimSliceAndPointerPrefix(s)
 	trimmedPrefix := trimSliceAndPointerPrefix(prefix)
 	return strings.HasPrefix(trimmedS, trimmedPrefix)
-}
-
-func log(obj ...any) { //nolint:unused
-	logS(spew.Sdump(obj...))
-}
-
-func logF(str string, args ...any) { //nolint:unused
-	logS(fmt.Sprintf(str, args...))
-}
-
-func logS(str string) { //nolint:unused
-	file := lo.Must(os.OpenFile("/tmp/starlog", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600))
-	defer file.Close() //nolint:errcheck
-	lo.Must(file.WriteString(str + "\n"))
 }
 
 func escape(s string) string {
