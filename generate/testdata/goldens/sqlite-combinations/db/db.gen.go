@@ -382,13 +382,18 @@ func migrate(dsn *DSN) error {
 // returns an error. All subsequent database calls will take place within this transaction,
 // so this is NOT thread-safe.
 func BeginTransaction() error {
-	if oldConnection == nil {
-		oldConnection = connection
-		var err error
-		connection, err = connection.(*sql.DB).Begin()
+	if oldConnection != nil {
+		return errors.New("transaction already started")
+	}
+
+	transaction, err := connection.(*sql.DB).Begin()
+	if err != nil {
 		return err
 	}
-	return errors.New("transaction already started")
+
+	oldConnection = connection
+	connection = transaction
+	return nil
 }
 
 // CommitTransaction commits the current transaction, if any.
