@@ -22,5 +22,7 @@ lint:
 fix:
     unbuffer golangci-lint run --color never --fix | gostack
 
+check: test fmt lint
+
 test:
     unbuffer go test -cover ./... | gostack --test
