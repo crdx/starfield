@@ -79,6 +79,11 @@ func testGenerateGolden(t *testing.T, golden goldenTest) {
 	assertCompiles(t, code)
 }
 
+func getRequest(t *testing.T) *plugin.GenerateRequest {
+	t.Helper()
+	return getRequestFromPath(t, requestPath)
+}
+
 func getRequestFromPath(t *testing.T, path string) *plugin.GenerateRequest {
 	t.Helper()
 

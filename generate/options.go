@@ -20,12 +20,10 @@ type Options struct {
 func parseOptions(req *plugin.GenerateRequest) (*Options, error) {
 	var options Options
 
-	if len(req.PluginOptions) == 0 {
-		return &options, nil
-	}
-
-	if err := json.Unmarshal(req.PluginOptions, &options); err != nil {
-		return nil, fmt.Errorf("unmarshalling plugin options: %w", err)
+	if len(req.PluginOptions) > 0 {
+		if err := json.Unmarshal(req.PluginOptions, &options); err != nil {
+			return nil, fmt.Errorf("unmarshalling plugin options: %w", err)
+		}
 	}
 
 	if options.Out == "" {
