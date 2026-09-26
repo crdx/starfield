@@ -339,6 +339,9 @@ func migrate(dsn *DSN) error {
 		ran[id] = true
 	}
 	rows.Close() //nolint:errcheck
+	if err := rows.Err(); err != nil {
+		return err
+	}
 
 	for _, migration := range config.Migrations {
 		if ran[migration.Name] {
