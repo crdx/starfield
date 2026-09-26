@@ -33,6 +33,22 @@ func readConfig(sqlcFile string) (*Config, error) {
 	return &config, nil
 }
 
+func readModulePath(goModFile string) (string, error) {
+	contents, err := os.ReadFile(filepath.Clean(goModFile))
+	if err != nil {
+		return "", err
+	}
+
+	for line := range strings.SplitSeq(string(contents), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 2 && fields[0] == "module" {
+			return strings.Trim(fields[1], "\"`"), nil
+		}
+	}
+
+	return "", fmt.Errorf("no module directive in %s", goModFile)
+}
+
 func getSchemaDir(config *Config, target string) (string, error) {
 	if len(config.SQL) == 0 {
 		return "", errors.New("no sql blocks")

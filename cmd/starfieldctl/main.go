@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -99,7 +100,12 @@ func doInit() {
 			log.Printf(col.Yellow("skip %s"), mainPath)
 		} else {
 			log.Printf(col.Green("write %s"), mainPath)
-			lo.Must0(os.WriteFile(mainPath, scaffold.MainGo, 0o600))
+			var output bytes.Buffer
+			lo.Must0(template.Must(template.New(mainPath).Parse(string(scaffold.MainGo))).Execute(
+				&output,
+				map[string]string{"Module": lo.Must(readModulePath("go.mod"))},
+			))
+			lo.Must0(os.WriteFile(mainPath, output.Bytes(), 0o600))
 		}
 	}
 
