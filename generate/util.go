@@ -92,6 +92,16 @@ func escape(s string) string {
 	return s
 }
 
+func escapeVariable(s string) string {
+	generatedNames := []string{
+		"err", "item", "items", "q", "queryParams", "result", "row", "rows", "sql", "strings",
+	}
+	if isReserved(s) || slices.Contains(generatedNames, s) {
+		return s + "_"
+	}
+	return s
+}
+
 func isReserved(s string) bool {
 	keywords := []string{
 		"break", "default", "func", "interface",

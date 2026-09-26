@@ -34,3 +34,6 @@ values (?, ?, ?, ?);
 
 -- name: TouchAuditEntry :execresult
 update audit_entries set description = ? where id = ?;
+
+-- name: Type :one
+select api_url as err from resources where id = ?;

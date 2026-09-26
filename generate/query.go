@@ -65,7 +65,7 @@ func (self QueryValue) Pairs() []Argument {
 		var out []Argument
 		for _, f := range self.Struct.Fields {
 			out = append(out, Argument{
-				Name: escape(toLowerCase(f.Name)),
+				Name: escapeVariable(toLowerCase(f.Name)),
 				Type: f.Type,
 			})
 		}
@@ -73,7 +73,7 @@ func (self QueryValue) Pairs() []Argument {
 	}
 	return []Argument{
 		{
-			Name: escape(toLowerCase(self.Name)),
+			Name: escapeVariable(toLowerCase(self.Name)),
 			Type: self.DefineType(),
 		},
 	}
@@ -101,7 +101,7 @@ func (self *QueryValue) DefineType() string {
 }
 
 func (self *QueryValue) ReturnName() string {
-	return escape(self.Name)
+	return self.Name
 }
 
 func (self QueryValue) UniqueFields() []Field {
@@ -125,10 +125,10 @@ func (self QueryValue) Params() string {
 	}
 	var out []string
 	if self.Struct == nil {
-		out = append(out, escape(self.Name))
+		out = append(out, escapeVariable(self.Name))
 	} else {
 		for _, f := range self.Struct.Fields {
-			out = append(out, escape(self.VariableForField(f)))
+			out = append(out, self.VariableForField(f))
 		}
 	}
 	if len(out) <= 3 {
@@ -171,7 +171,7 @@ func (self QueryValue) VariableForField(field Field) string {
 		return self.Name
 	}
 	if !self.EmitStruct() {
-		return toLowerCase(field.Name)
+		return escapeVariable(toLowerCase(field.Name))
 	}
 	return self.Name + "." + field.Name
 }
@@ -186,7 +186,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 	for _, sourceQuery := range req.Queries {
 		query := Query{
 			Command:      sourceQuery.Cmd,
-			ConstantName: sdk.LowerTitle(sourceQuery.Name),
+			ConstantName: escape(sdk.LowerTitle(sourceQuery.Name)),
 			MethodName:   sourceQuery.Name,
 			SourceName:   strings.TrimSuffix(sourceQuery.Filename, ".sql"),
 			SQL:          sourceQuery.Text,
@@ -218,7 +218,7 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 		if len(sourceQuery.Columns) == 1 {
 			column := sourceQuery.Columns[0]
 			query.ReturnValue = QueryValue{
-				Name: escape(getColumnName(column, 0)),
+				Name: escapeVariable(getColumnName(column, 0)),
 				Typ:  getGoType(column),
 			}
 		} else if returnsData(sourceQuery) {

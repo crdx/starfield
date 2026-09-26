@@ -2682,6 +2682,28 @@ func TouchAuditEntry(params TouchAuditEntryParams) sql.Result {
 	return result
 }
 
+// :one
+const type_ = `
+select api_url as err from resources where id = ?
+`
+
+// Type runs an SQL query.
+//
+// select api_url as err from resources where id = ?
+func Type(id string) (string, bool) {
+	row := QueryRow(type_, id)
+	var err_ string
+	err := row.Scan(&err_)
+	if err == sql.ErrNoRows {
+		return err_, false
+	}
+	if err != nil {
+		handleError(err)
+		return err_, false
+	}
+	return err_, true
+}
+
 // :execrows
 const updateResource = `
 update resources
