@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.12.0] - 2026-09-27
+
+### Added
+
+- `Find<Model>By<Field>Unscoped` finders that include soft-deleted rows
+- Support for non-integer model IDs
+
+### Fixed
+
+- SQLite migrations failing on the MySQL-only migration lock
+- Generated `Create` functions for tables with a nullable `created_at` column
+- Generated code failing to compile when names clash with identifiers or keywords
+- A failed `BeginTransaction` leaving the connection in a broken state
+- Migration row iteration errors being silently ignored
+- Plugin option defaults not being applied when no options are given
+- `starfieldctl init` scaffold missing the `db` package import
+
 ## [1.11.1] - 2026-07-28
 
 ### Fixed
