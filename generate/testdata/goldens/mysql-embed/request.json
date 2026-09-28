@@ -1,0 +1,321 @@
+{
+  "settings":  {
+    "version":  "2",
+    "engine":  "mysql",
+    "schema":  [
+      "schema"
+    ],
+    "queries":  [
+      "queries"
+    ],
+    "codegen":  {
+      "out":  "db",
+      "plugin":  "starfield-capture",
+      "options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIifQ==",
+      "process":  {
+        "cmd":  "/tmp/starfield-capture"
+      }
+    }
+  },
+  "catalog":  {
+    "defaultSchema":  "public",
+    "schemas":  [
+      {
+        "name":  "public",
+        "tables":  [
+          {
+            "rel":  {
+              "name":  "authors"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "authors"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "name",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "authors"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "born_on",
+                "length":  -1,
+                "table":  {
+                  "name":  "authors"
+                },
+                "type":  {
+                  "name":  "date"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "books"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "books"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "author_id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "books"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "title",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "books"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "created_at",
+                "notNull":  true,
+                "length":  19,
+                "table":  {
+                  "name":  "books"
+                },
+                "type":  {
+                  "name":  "datetime"
+                }
+              }
+            ]
+          },
+          {
+            "rel":  {
+              "name":  "book_reviews"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "book_reviews"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "book_id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "book_reviews"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "rating",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "book_reviews"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                },
+                "unsigned":  true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "queries":  [
+    {
+      "text":  "select books.id, books.author_id, books.title, books.created_at, authors.id, authors.name, authors.born_on\nfrom books\njoin authors on authors.id = books.author_id\norder by books.id",
+      "name":  "ListBooksWithAuthors",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "books",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "books"
+          }
+        },
+        {
+          "name":  "authors",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "authors"
+          }
+        }
+      ],
+      "filename":  "embeds.sql"
+    },
+    {
+      "text":  "select books.id, books.author_id, books.title, books.created_at, authors.name as author_name\nfrom books\njoin authors on authors.id = books.author_id\nwhere books.id = ?",
+      "name":  "FindBookWithAuthorName",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "books",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "books"
+          }
+        },
+        {
+          "name":  "author_name",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "authors"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "name"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "books"
+            },
+            "type":  {
+              "name":  "int"
+            },
+            "originalName":  "id",
+            "unsigned":  true
+          }
+        }
+      ],
+      "filename":  "embeds.sql"
+    },
+    {
+      "text":  "select books.id, books.author_id, books.title, books.created_at\nfrom books\njoin authors on authors.id = books.author_id\nwhere authors.name = ?",
+      "name":  "ListBooksByAuthorName",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "books",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "books"
+          }
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "name",
+            "notNull":  true,
+            "length":  255,
+            "table":  {
+              "name":  "authors"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "name"
+          }
+        }
+      ],
+      "filename":  "embeds.sql"
+    },
+    {
+      "text":  "select first.id, first.name, first.born_on, second.id, second.name, second.born_on\nfrom authors first\njoin authors second on second.id > first.id",
+      "name":  "ListCoauthorPairs",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "authors",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "authors"
+          }
+        },
+        {
+          "name":  "authors",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "authors"
+          }
+        }
+      ],
+      "filename":  "embeds.sql"
+    },
+    {
+      "text":  "select book_reviews.id, book_reviews.book_id, book_reviews.rating, books.id, books.author_id, books.title, books.created_at\nfrom book_reviews\njoin books on books.id = book_reviews.book_id",
+      "name":  "ListReviewsWithBooks",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "book_reviews",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "book_reviews"
+          }
+        },
+        {
+          "name":  "books",
+          "length":  -1,
+          "type":  {},
+          "embedTable":  {
+            "name":  "books"
+          }
+        }
+      ],
+      "filename":  "embeds.sql"
+    }
+  ],
+  "sqlc_version":  "v1.31.1",
+  "plugin_options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIifQ=="
+}

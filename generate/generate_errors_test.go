@@ -65,3 +65,29 @@ func TestGenerateReportsFormattingError(t *testing.T) {
 		t.Fatalf("generate() error = %v, want formatting error", err)
 	}
 }
+
+func TestRunRejectsEmbedWithoutModel(t *testing.T) {
+	request := getRequest(t)
+	request.Queries = []*plugin.Query{{
+		Name: "ListMissing",
+		Cmd:  ":many",
+		Columns: []*plugin.Column{
+			{Name: "missing", EmbedTable: &plugin.Identifier{Name: "missing"}},
+		},
+	}}
+
+	if _, err := Run(context.Background(), request); err == nil || !strings.Contains(err.Error(), "ListMissing: sqlc.embed(missing): no model for table missing") {
+		t.Fatalf("Run() error = %v, want missing model error", err)
+	}
+}
+
+func TestRunRejectsUnsupportedCommands(t *testing.T) {
+	for _, command := range []string{":copyfrom", ":batchexec", ":batchmany", ":batchone"} {
+		request := getRequest(t)
+		request.Queries = []*plugin.Query{{Name: "Bulk", Cmd: command}}
+
+		if _, err := Run(context.Background(), request); err == nil || !strings.Contains(err.Error(), "Bulk: "+command+" is not supported") {
+			t.Errorf("Run() error = %v, want %s refused", err, command)
+		}
+	}
+}

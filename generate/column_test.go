@@ -12,12 +12,17 @@ func TestGetType(t *testing.T) {
 		typeName string
 		notNull  bool
 		unsigned bool
+		length   int32
 		want     string
 	}{
 		{name: "string", typeName: "varchar", notNull: true, want: "string"},
 		{name: "nullable string", typeName: "text", want: "sql.Null[string]"},
-		{name: "boolean tinyint", typeName: "tinyint", notNull: true, want: "bool"},
-		{name: "nullable tinyint", typeName: "tinyint", want: "sql.Null[bool]"},
+		{name: "boolean tinyint", typeName: "tinyint", notNull: true, length: 1, want: "bool"},
+		{name: "nullable boolean tinyint", typeName: "tinyint", length: 1, want: "sql.Null[bool]"},
+		{name: "tinyint", typeName: "tinyint", notNull: true, length: -1, want: "int64"},
+		{name: "unsigned tinyint", typeName: "tinyint", notNull: true, unsigned: true, length: -1, want: "uint64"},
+		{name: "wide tinyint", typeName: "tinyint", notNull: true, length: 4, want: "int64"},
+		{name: "nullable tinyint", typeName: "tinyint", length: -1, want: "sql.Null[int64]"},
 		{name: "signed integer", typeName: "int", notNull: true, want: "int64"},
 		{name: "unsigned integer", typeName: "bigint", notNull: true, unsigned: true, want: "uint64"},
 		{name: "nullable signed integer", typeName: "smallint", want: "sql.Null[int64]"},
@@ -32,7 +37,10 @@ func TestGetType(t *testing.T) {
 		{name: "nullable time", typeName: "timestamp", want: "sql.Null[time.Time]"},
 		{name: "boolean", typeName: "boolean", notNull: true, want: "bool"},
 		{name: "nullable boolean", typeName: "bool", want: "sql.Null[bool]"},
-		{name: "enum", typeName: "enum", want: "string"},
+		{name: "enum", typeName: "enum", notNull: true, want: "string"},
+		{name: "nullable enum", typeName: "enum", want: "sql.Null[string]"},
+		{name: "json", typeName: "json", notNull: true, want: "json.RawMessage"},
+		{name: "nullable json", typeName: "json", want: "sql.Null[json.RawMessage]"},
 		{name: "unknown", typeName: "geometry", want: "any"},
 	}
 
@@ -42,12 +50,55 @@ func TestGetType(t *testing.T) {
 				Type:     &plugin.Identifier{Name: test.typeName},
 				NotNull:  test.notNull,
 				Unsigned: test.unsigned,
+				Length:   test.length,
 			}
 			if got := getType(column); got != test.want {
 				t.Errorf("getType() = %q, want %q", got, test.want)
 			}
 		})
 	}
+}
+
+func TestNormaliseEnumTypesRenamesOnlyTheCatalogsEnums(t *testing.T) {
+	enumColumn := func(schema string, name string) *plugin.Column {
+		return &plugin.Column{Type: &plugin.Identifier{Schema: schema, Name: name}}
+	}
+	tableColumn := enumColumn("", "things_kind")
+	otherSchemaColumn := enumColumn("archive", "things_kind")
+	queryColumn := enumColumn("", "things_kind")
+	parameterColumn := enumColumn("", "things_kind")
+	plainColumn := enumColumn("", "varchar")
+	request := &plugin.GenerateRequest{
+		Catalog: &plugin.Catalog{
+			DefaultSchema: "public",
+			Schemas: []*plugin.Schema{{
+				Name:  "public",
+				Enums: []*plugin.Enum{{Name: "things_kind"}},
+				Tables: []*plugin.Table{{
+					Rel:     &plugin.Identifier{Name: "things"},
+					Columns: []*plugin.Column{tableColumn, otherSchemaColumn, plainColumn, {Name: "untyped"}},
+				}},
+			}},
+		},
+		Queries: []*plugin.Query{{
+			Columns: []*plugin.Column{queryColumn},
+			Params:  []*plugin.Parameter{{Number: 1, Column: parameterColumn}},
+		}},
+	}
+
+	normaliseEnumTypes(request)
+
+	for name, column := range map[string]*plugin.Column{"table": tableColumn, "query": queryColumn, "parameter": parameterColumn} {
+		if column.Type.Name != "enum" {
+			t.Errorf("%s column type = %s, want enum", name, column.Type.Name)
+		}
+	}
+	if otherSchemaColumn.Type.Name != "things_kind" || plainColumn.Type.Name != "varchar" {
+		t.Errorf("renamed a column that holds no enum of the default schema")
+	}
+
+	// A catalog without enums is left alone.
+	normaliseEnumTypes(&plugin.GenerateRequest{Catalog: &plugin.Catalog{}})
 }
 
 func TestGetColumnNameUsesPositionForUnnamedColumn(t *testing.T) {

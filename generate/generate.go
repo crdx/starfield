@@ -35,6 +35,7 @@ func Run(ctx context.Context, req *plugin.GenerateRequest) (*plugin.GenerateResp
 		return nil, err
 	}
 
+	normaliseEnumTypes(req)
 	structs := makeStructs(req, options)
 	queries, err := makeQueries(req, options, structs)
 	if err != nil {

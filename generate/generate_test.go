@@ -43,6 +43,16 @@ var goldenTests = []goldenTest{
 		FixturePath: "testdata/goldens/mysql-combinations/db/db.gen.go",
 	},
 	{
+		Name:        "mysql-embed",
+		RequestPath: "testdata/goldens/mysql-embed/request.json",
+		FixturePath: "testdata/goldens/mysql-embed/db/db.gen.go",
+	},
+	{
+		Name:        "mysql-types",
+		RequestPath: "testdata/goldens/mysql-types/request.json",
+		FixturePath: "testdata/goldens/mysql-types/db/db.gen.go",
+	},
+	{
 		Name:        "sqlite-combinations",
 		RequestPath: "testdata/goldens/sqlite-combinations/request.json",
 		FixturePath: "testdata/goldens/sqlite-combinations/db/db.gen.go",

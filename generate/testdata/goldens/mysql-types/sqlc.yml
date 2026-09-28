@@ -1,0 +1,16 @@
+version: '2'
+sql:
+  - name: mysql-types
+    engine: mysql
+    queries: queries
+    schema: schema
+    codegen:
+      - plugin: starfield-capture
+        out: db
+        options:
+          package: db
+          max_params: 2
+plugins:
+  - name: starfield-capture
+    process:
+      cmd: /tmp/starfield-capture

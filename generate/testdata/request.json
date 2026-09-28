@@ -95,7 +95,7 @@
               {
                 "name":  "active",
                 "notNull":  true,
-                "length":  -1,
+                "length":  1,
                 "table":  {
                   "name":  "users"
                 },
@@ -221,7 +221,7 @@
               {
                 "name":  "published",
                 "notNull":  true,
-                "length":  -1,
+                "length":  1,
                 "table":  {
                   "name":  "posts"
                 },
@@ -306,7 +306,7 @@
         {
           "name":  "published",
           "notNull":  true,
-          "length":  -1,
+          "length":  1,
           "table":  {
             "name":  "posts"
           },
@@ -434,7 +434,7 @@
         {
           "name":  "active",
           "notNull":  true,
-          "length":  -1,
+          "length":  1,
           "table":  {
             "name":  "users"
           },
@@ -580,7 +580,7 @@
         {
           "name":  "active",
           "notNull":  true,
-          "length":  -1,
+          "length":  1,
           "table":  {
             "name":  "users"
           },

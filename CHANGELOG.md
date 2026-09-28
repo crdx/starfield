@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Support for `sqlc.embed()`
+
+### Changed
+
+- Map `tinyint(1)` to bool only
+- Map `json` column to `json.RawMessage`
+- `:copyfrom` and the `:batch` commands are refused rather than silently generating nothing
+
+### Fixed
+
+- MySQL `enum` columns generating `any`
+- A `:one` query column that clashes with a parameter name
+
 ## [1.12.0] - 2026-09-27
 
 ### Added

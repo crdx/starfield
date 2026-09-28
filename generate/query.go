@@ -2,6 +2,7 @@ package generate
 
 import (
 	"cmp"
+	"fmt"
 	"slices"
 	"strings"
 
@@ -149,6 +150,12 @@ func (self QueryValue) Scan() string {
 		out = append(out, "&"+self.Name)
 	} else {
 		for _, f := range self.Struct.Fields {
+			if len(f.EmbedFields) > 0 {
+				for _, embedded := range f.EmbedFields {
+					out = append(out, "&"+self.Name+"."+f.Name+"."+embedded.Name)
+				}
+				continue
+			}
 			out = append(out, "&"+self.Name+"."+f.Name)
 		}
 	}
@@ -177,6 +184,9 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 	queries := make([]Query, 0, len(req.Queries))
 
 	for _, sourceQuery := range req.Queries {
+		if !supportedCommands[sourceQuery.Cmd] {
+			return nil, fmt.Errorf("%s: %s is not supported", sourceQuery.Name, sourceQuery.Cmd)
+		}
 		query := Query{
 			Command:      sourceQuery.Cmd,
 			ConstantName: escape(sdk.LowerTitle(sourceQuery.Name)),
@@ -208,18 +218,25 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 			}
 		}
 
-		if len(sourceQuery.Columns) == 1 {
+		if len(sourceQuery.Columns) == 1 && sourceQuery.Columns[0].EmbedTable == nil {
 			column := sourceQuery.Columns[0]
 			query.ReturnValue = QueryValue{
-				Name: escapeVariable(getColumnName(column, 0)),
+				Name: returnName(query, escapeVariable(getColumnName(column, 0))),
 				Typ:  getGoType(column),
 			}
 		} else if returnsData(sourceQuery) {
 			var foundStruct *Struct
 			var emitAsStruct bool
 
-			// Find a struct that we can use as the return value for this query.
+			// Find a struct that we can use as the return value for this query. A row holding an
+			// embedded model never matches one, since no model has a model as a field.
+			hasEmbed := slices.ContainsFunc(sourceQuery.Columns, func(column *plugin.Column) bool {
+				return column.EmbedTable != nil
+			})
 			for _, s := range structs {
+				if hasEmbed {
+					break
+				}
 				if len(s.Fields) != len(sourceQuery.Columns) {
 					continue
 				}
@@ -243,9 +260,18 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 			if foundStruct == nil {
 				var columns []Column
 				for i, column := range sourceQuery.Columns {
+					var embed *Struct
+					if column.EmbedTable != nil {
+						var err error
+						embed, err = findEmbed(column.EmbedTable, structs, req.Catalog.DefaultSchema)
+						if err != nil {
+							return nil, fmt.Errorf("%s: %w", query.MethodName, err)
+						}
+					}
 					columns = append(columns, Column{
 						id:     i,
 						Column: column,
+						embed:  embed,
 					})
 				}
 				var err error
@@ -271,6 +297,35 @@ func makeQueries(req *plugin.GenerateRequest, options *Options, structs []Struct
 	})
 
 	return queries, nil
+}
+
+// supportedCommands are the query commands starfield generates a function for. The rest (sqlc's
+// :copyfrom and :batch commands) are refused rather than skipped, since a skipped query would
+// leave nothing behind but an unused params struct.
+var supportedCommands = map[string]bool{
+	metadata.CmdOne:        true,
+	metadata.CmdMany:       true,
+	metadata.CmdExec:       true,
+	metadata.CmdExecRows:   true,
+	metadata.CmdExecLastId: true,
+	metadata.CmdExecResult: true,
+}
+
+// returnName is the variable a single-column query scans into. A :one query declares it in the
+// function's own scope, beside the parameters, so one sharing a parameter's name would not
+// compile: it is suffixed until it is free, as sqlc-gen-go does (sqlc-dev/sqlc#4354).
+func returnName(query Query, name string) string {
+	if query.Command != metadata.CmdOne {
+		return name
+	}
+	taken := map[string]bool{}
+	for _, pair := range query.Argument.Pairs() {
+		taken[pair.Name] = true
+	}
+	for taken[name] {
+		name += "_2"
+	}
+	return name
 }
 
 func shouldEmitAsStruct(params []*plugin.Parameter, maxParams int) bool {

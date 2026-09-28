@@ -40,3 +40,26 @@ func TestMakeStructsSkipsInformationSchemaAndPrefixesOtherSchemas(t *testing.T) 
 		t.Errorf("table schema = %q, want extra", got)
 	}
 }
+
+func TestFindEmbedMatchesAnExplicitSchema(t *testing.T) {
+	structs := []Struct{
+		{Name: "PublicBook", Table: &plugin.Identifier{Schema: "public", Name: "books"}},
+		{Name: "ArchiveBook", Table: &plugin.Identifier{Schema: "archive", Name: "books"}},
+	}
+
+	model, err := findEmbed(&plugin.Identifier{Schema: "archive", Name: "books"}, structs, "public")
+	if err != nil {
+		t.Fatalf("findEmbed() error = %v", err)
+	}
+	if model.Name != "ArchiveBook" {
+		t.Errorf("findEmbed() = %s, want ArchiveBook", model.Name)
+	}
+
+	model, err = findEmbed(&plugin.Identifier{Name: "books"}, structs, "public")
+	if err != nil {
+		t.Fatalf("findEmbed() error = %v", err)
+	}
+	if model.Name != "PublicBook" {
+		t.Errorf("findEmbed() = %s, want PublicBook", model.Name)
+	}
+}

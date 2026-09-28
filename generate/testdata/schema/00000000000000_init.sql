@@ -5,7 +5,7 @@ create table users (
     name varchar(255) not null,
     email varchar(255) default null,
     age int default null,
-    active tinyint not null,
+    active boolean not null,
     balance decimal(10, 2) not null,
     score double default null,
     notes text default null,
@@ -19,5 +19,5 @@ create table posts (
     user_id int unsigned not null,
     title varchar(255) not null,
     body text not null,
-    published tinyint not null
+    published boolean not null
 );

@@ -13,6 +13,10 @@ type Field struct {
 	Nullable bool
 	Tags     map[string]string
 	Column   *plugin.Column
+
+	// EmbedFields are the model's fields when this field is a whole model from sqlc.embed(), which
+	// are scanned one by one in its place.
+	EmbedFields []Field
 }
 
 var nullableType = regexp.MustCompile(`sql\.Null\[(.*)\]`)

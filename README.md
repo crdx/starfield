@@ -38,6 +38,21 @@ For an instance of `M` and a column `C`:
 
 Helper methods for operations that are irrelevant for the type in question are not generated. For example, `Unscoped` variants won't be generated for models without a `deleted_at` column, and `ClearX` will only be generated for nullable columns.
 
+## Embedding models
+
+A query can return whole models with `sqlc.embed`, as it can with `sqlc-gen-go`:
+
+```sql
+-- name: ListBooksWithAuthors :many
+select sqlc.embed(books), sqlc.embed(authors)
+from books
+join authors on authors.id = books.author_id;
+```
+
+Each embedded table becomes one field of the row, named and typed after its model, so the row above has `Book Book` and `Author Author`. Embedding the same table twice numbers the second field (`Author_2`). A table with no model is a generation error.
+
+Embed only a table every row has. sqlc says nothing about whether an embedded table is on the nullable side of an outer join, so a `left join` embed generates, but its scan fails on any row the join leaves empty. Select that table's columns individually instead.
+
 ## More features
 
 Aside from the model-specific methods above, a number of more general helper methods are also available.

@@ -1,0 +1,353 @@
+{
+  "settings":  {
+    "version":  "2",
+    "engine":  "mysql",
+    "schema":  [
+      "schema"
+    ],
+    "queries":  [
+      "queries"
+    ],
+    "codegen":  {
+      "out":  "db",
+      "plugin":  "starfield-capture",
+      "options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIifQ==",
+      "process":  {
+        "cmd":  "/tmp/starfield-capture"
+      }
+    }
+  },
+  "catalog":  {
+    "defaultSchema":  "public",
+    "schemas":  [
+      {
+        "name":  "public",
+        "tables":  [
+          {
+            "rel":  {
+              "name":  "things"
+            },
+            "columns":  [
+              {
+                "name":  "id",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "int"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "name",
+                "notNull":  true,
+                "length":  255,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "varchar"
+                }
+              },
+              {
+                "name":  "flag",
+                "notNull":  true,
+                "length":  1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              },
+              {
+                "name":  "maybe_flag",
+                "length":  1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              },
+              {
+                "name":  "rating",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                },
+                "unsigned":  true
+              },
+              {
+                "name":  "offset_value",
+                "length":  -1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "tinyint"
+                }
+              },
+              {
+                "name":  "payload",
+                "notNull":  true,
+                "length":  -1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "json"
+                }
+              },
+              {
+                "name":  "maybe_payload",
+                "length":  -1,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "json"
+                }
+              },
+              {
+                "name":  "kind",
+                "notNull":  true,
+                "length":  5,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "things_kind"
+                }
+              },
+              {
+                "name":  "maybe_kind",
+                "length":  5,
+                "table":  {
+                  "name":  "things"
+                },
+                "type":  {
+                  "name":  "things_maybe_kind"
+                }
+              }
+            ]
+          }
+        ],
+        "enums":  [
+          {
+            "name":  "things_kind",
+            "vals":  [
+              "small",
+              "large"
+            ]
+          },
+          {
+            "name":  "things_maybe_kind",
+            "vals":  [
+              "red",
+              "green"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "queries":  [
+    {
+      "text":  "select name from things where name = ?",
+      "name":  "FindName",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "name",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "things"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "name"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "name",
+            "notNull":  true,
+            "length":  255,
+            "table":  {
+              "name":  "things"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "name"
+          }
+        }
+      ],
+      "comments":  [
+        " FindName returns a column named like its parameter, which the generated function must not",
+        " declare twice."
+      ],
+      "filename":  "things.sql"
+    },
+    {
+      "text":  "select name from things where name like ?",
+      "name":  "FindNames",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "name",
+          "notNull":  true,
+          "length":  255,
+          "table":  {
+            "name":  "things"
+          },
+          "type":  {
+            "name":  "varchar"
+          },
+          "originalName":  "name"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "name",
+            "notNull":  true,
+            "length":  255,
+            "table":  {
+              "name":  "things"
+            },
+            "type":  {
+              "name":  "varchar"
+            },
+            "originalName":  "name"
+          }
+        }
+      ],
+      "filename":  "things.sql"
+    },
+    {
+      "text":  "select kind from things where maybe_kind = ?",
+      "name":  "FindKinds",
+      "cmd":  ":many",
+      "columns":  [
+        {
+          "name":  "kind",
+          "notNull":  true,
+          "length":  5,
+          "table":  {
+            "name":  "things"
+          },
+          "type":  {
+            "name":  "things_kind"
+          },
+          "originalName":  "kind"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "maybe_kind",
+            "length":  5,
+            "isNamedParam":  true,
+            "table":  {
+              "name":  "things"
+            },
+            "type":  {
+              "name":  "things_maybe_kind"
+            },
+            "originalName":  "maybe_kind"
+          }
+        }
+      ],
+      "filename":  "things.sql"
+    },
+    {
+      "text":  "select payload from things where id = ?",
+      "name":  "FindPayload",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "payload",
+          "notNull":  true,
+          "length":  -1,
+          "table":  {
+            "name":  "things"
+          },
+          "type":  {
+            "name":  "json"
+          },
+          "originalName":  "payload"
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "id",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "things"
+            },
+            "type":  {
+              "name":  "int"
+            },
+            "originalName":  "id",
+            "unsigned":  true
+          }
+        }
+      ],
+      "filename":  "things.sql"
+    },
+    {
+      "text":  "select count(*) from things where kind = 'large' and rating > ?",
+      "name":  "CountLarge",
+      "cmd":  ":one",
+      "columns":  [
+        {
+          "name":  "count",
+          "notNull":  true,
+          "length":  -1,
+          "isFuncCall":  true,
+          "type":  {
+            "name":  "bigint"
+          }
+        }
+      ],
+      "parameters":  [
+        {
+          "number":  1,
+          "column":  {
+            "name":  "rating",
+            "notNull":  true,
+            "length":  -1,
+            "table":  {
+              "name":  "things"
+            },
+            "type":  {
+              "name":  "tinyint"
+            },
+            "originalName":  "rating",
+            "unsigned":  true
+          }
+        }
+      ],
+      "filename":  "things.sql"
+    }
+  ],
+  "sqlc_version":  "v1.31.1",
+  "plugin_options":  "eyJtYXhfcGFyYW1zIjoyLCJwYWNrYWdlIjoiZGIifQ=="
+}

@@ -9,8 +9,10 @@ import (
 )
 
 var stdlibTypes = map[string]string{
-	"sql.Null[time.Time]": "time",
-	"time.Time":           "time",
+	"sql.Null[time.Time]":       "time",
+	"time.Time":                 "time",
+	"sql.Null[json.RawMessage]": "encoding/json",
+	"json.RawMessage":           "encoding/json",
 }
 
 type FileImports struct {
