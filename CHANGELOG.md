@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.13.0] - 2026-09-28
 
 ### Added
 
@@ -10,7 +10,7 @@
 
 - Map `tinyint(1)` to bool only
 - Map `json` column to `json.RawMessage`
-- `:copyfrom` and the `:batch` commands are refused rather than silently generating nothing
+- Refuse `:copyfrom` and `:batch` commands
 
 ### Fixed
 
