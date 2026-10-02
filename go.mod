@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	crdx.org/col v1.2.0
 	crdx.org/duckopt/v2 v2.3.0
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/jinzhu/inflection v1.0.0
 	github.com/samber/lo v1.51.0
 	github.com/samber/mo v1.16.0
@@ -18,6 +17,7 @@ require (
 
 require (
 	crdx.org/hereduck v1.0.4 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
