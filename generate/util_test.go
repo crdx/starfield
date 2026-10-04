@@ -92,6 +92,10 @@ func TestTypeAndInflectionUtilities(t *testing.T) {
 	if got := oneline("one\n  two\tthree"); got != "one two three" {
 		t.Errorf("oneline() = %q", got)
 	}
+
+	if got := oneline("\n  one\ntwo  \n"); got != "one two" {
+		t.Errorf("oneline() = %q", got)
+	}
 }
 
 func TestFillSlice(t *testing.T) {

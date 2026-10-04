@@ -91,6 +91,7 @@ func testGenerateGolden(t *testing.T, golden goldenTest) {
 		)
 	}
 
+	assertGofmtClean(t, code)
 	assertCompiles(t, code)
 }
 

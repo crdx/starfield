@@ -174,5 +174,5 @@ func getIdentifierName(name string, options *Options) string {
 }
 
 func oneline(s string) string {
-	return regexp.MustCompile(`\s+`).ReplaceAllString(s, " ")
+	return regexp.MustCompile(`\s+`).ReplaceAllString(strings.TrimSpace(s), " ")
 }
