@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.1] - 2026-10-06
+
+### Changed
+
+- Trim whitespace from generated SQL
+
 ## [1.13.0] - 2026-09-28
 
 ### Added
