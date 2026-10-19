@@ -11,6 +11,7 @@
 		ParseTime            bool           // Parse time values to time.Time
 		MultiStatements      bool           // Allow multiple statements in one query
 		AllowNativePasswords bool           // Allow native password authentication
+		InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 	}
 
 	func NewDSN() *DSN {
@@ -18,6 +19,9 @@
 			Timezone:             time.UTC,
 			ParseTime:            true,
 			AllowNativePasswords: true,
+			{{- if eq .Engine "mysql" }}
+				InterpolateParams: true,
+			{{- end }}
 		}
 	}
 
@@ -77,6 +81,10 @@
 			writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 		}
 
+		if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+			writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+		}
+
 		if self.MultiStatements {
 			writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 		}
@@ -86,6 +94,14 @@
 		}
 
 		return buf.String()
+	}
+
+	var unsafeInterpolationCharsets = map[string]bool{
+		"big5":   true,
+		"cp932":  true,
+		"gb2312": true,
+		"gbk":    true,
+		"sjis":   true,
 	}
 
 	func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {

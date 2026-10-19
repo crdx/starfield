@@ -10,6 +10,12 @@ import (
 )
 
 func TestFailedBeginPreservesGeneratedConnectionState(t *testing.T) {
+	runGeneratedTest(t, "transaction_test.go", failedBeginTest)
+}
+
+func runGeneratedTest(t *testing.T, name string, source string) {
+	t.Helper()
+
 	response, err := Run(context.Background(), getRequest(t))
 	if err != nil {
 		t.Fatalf("generate code: %v", err)
@@ -23,8 +29,8 @@ func TestFailedBeginPreservesGeneratedConnectionState(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(directory, fixtureFile), response.Files[0].Contents, 0o600); err != nil {
 		t.Fatalf("write generated code: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(directory, "transaction_test.go"), []byte(failedBeginTest), 0o600); err != nil {
-		t.Fatalf("write transaction test: %v", err)
+	if err := os.WriteFile(filepath.Join(directory, name), []byte(source), 0o600); err != nil {
+		t.Fatalf("write %s: %v", name, err)
 	}
 
 	command := exec.Command("go", "test", "./...")
@@ -32,7 +38,7 @@ func TestFailedBeginPreservesGeneratedConnectionState(t *testing.T) {
 	command.Env = append(os.Environ(), "GOFLAGS=-mod=mod", "GOPROXY=off")
 	output, err := command.CombinedOutput()
 	if err != nil {
-		t.Fatalf("test generated transaction code: %v\n%s", err, output)
+		t.Fatalf("test generated code: %v\n%s", err, output)
 	}
 }
 

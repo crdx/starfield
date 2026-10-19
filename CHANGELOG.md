@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changes
+
+- Add `DSN.InterpolateParams`, enabled by default for MySQL
+
 ## [1.13.1] - 2026-10-06
 
 ### Changed
