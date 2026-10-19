@@ -330,7 +330,7 @@
 
 			// Find{{ $name }}By{{ .Name }} finds an instance of {{ $name }} by {{ .Name }}.
 			func Find{{ $name }}By{{ .Name }}(value {{ .BaseType }}) (*{{ $name }}, bool) {
-				row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ?{{ if $hasDeletedAt }} AND deleted_at IS NULL{{ end }}", value)
+				row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ?{{ if $hasDeletedAt }} AND deleted_at IS NULL{{ end }} limit 1", value)
 				item := new({{ $name }})
 				err := row.Scan(
 					{{- range $fields }}
@@ -350,7 +350,7 @@
 			{{ if $hasDeletedAt }}
 				// Find{{ $name }}By{{ .Name }}Unscoped finds an instance (including deleted) of {{ $name }} by {{ .Name }}.
 				func Find{{ $name }}By{{ .Name }}Unscoped(value {{ .BaseType }}) (*{{ $name }}, bool) {
-					row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ?", value)
+					row := QueryRow("select {{ $fieldNames }} from `{{ $table.Name }}` where `{{ .Tags.column }}` = ? limit 1", value)
 					item := new({{ $name }})
 					err := row.Scan(
 						{{- range $fields }}

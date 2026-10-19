@@ -489,6 +489,7 @@ type DSN struct {
 	ParseTime            bool           // Parse time values to time.Time
 	MultiStatements      bool           // Allow multiple statements in one query
 	AllowNativePasswords bool           // Allow native password authentication
+	InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 }
 
 func NewDSN() *DSN {
@@ -496,6 +497,7 @@ func NewDSN() *DSN {
 		Timezone:             time.UTC,
 		ParseTime:            true,
 		AllowNativePasswords: true,
+		InterpolateParams:    true,
 	}
 }
 
@@ -555,6 +557,10 @@ func (self *DSN) Format() string {
 		writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 	}
 
+	if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+		writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+	}
+
 	if self.MultiStatements {
 		writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 	}
@@ -564,6 +570,14 @@ func (self *DSN) Format() string {
 	}
 
 	return buf.String()
+}
+
+var unsafeInterpolationCharsets = map[string]bool{
+	"big5":   true,
+	"cp932":  true,
+	"gb2312": true,
+	"gbk":    true,
+	"sjis":   true,
 }
 
 func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
@@ -935,7 +949,7 @@ func FindThingsByName(value string) []*Thing {
 
 // FindThingByName finds an instance of Thing by Name.
 func FindThingByName(value string) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `name` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `name` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1018,7 +1032,7 @@ func FindThingsByFlag(value bool) []*Thing {
 
 // FindThingByFlag finds an instance of Thing by Flag.
 func FindThingByFlag(value bool) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `flag` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `flag` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1105,7 +1119,7 @@ func FindThingsByMaybeFlag(value sql.Null[bool]) []*Thing {
 
 // FindThingByMaybeFlag finds an instance of Thing by MaybeFlag.
 func FindThingByMaybeFlag(value bool) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_flag` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_flag` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1204,7 +1218,7 @@ func FindThingsByRating(value uint64) []*Thing {
 
 // FindThingByRating finds an instance of Thing by Rating.
 func FindThingByRating(value uint64) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `rating` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `rating` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1291,7 +1305,7 @@ func FindThingsByOffsetValue(value sql.Null[int64]) []*Thing {
 
 // FindThingByOffsetValue finds an instance of Thing by OffsetValue.
 func FindThingByOffsetValue(value int64) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `offset_value` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `offset_value` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1390,7 +1404,7 @@ func FindThingsByPayload(value json.RawMessage) []*Thing {
 
 // FindThingByPayload finds an instance of Thing by Payload.
 func FindThingByPayload(value json.RawMessage) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `payload` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `payload` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1477,7 +1491,7 @@ func FindThingsByMaybePayload(value sql.Null[json.RawMessage]) []*Thing {
 
 // FindThingByMaybePayload finds an instance of Thing by MaybePayload.
 func FindThingByMaybePayload(value json.RawMessage) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_payload` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_payload` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1576,7 +1590,7 @@ func FindThingsByKind(value string) []*Thing {
 
 // FindThingByKind finds an instance of Thing by Kind.
 func FindThingByKind(value string) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `kind` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `kind` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,
@@ -1663,7 +1677,7 @@ func FindThingsByMaybeKind(value sql.Null[string]) []*Thing {
 
 // FindThingByMaybeKind finds an instance of Thing by MaybeKind.
 func FindThingByMaybeKind(value string) (*Thing, bool) {
-	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_kind` = ?", value)
+	row := QueryRow("select `id`, `name`, `flag`, `maybe_flag`, `rating`, `offset_value`, `payload`, `maybe_payload`, `kind`, `maybe_kind` from `things` where `maybe_kind` = ? limit 1", value)
 	item := new(Thing)
 	err := row.Scan(
 		&item.ID,

@@ -488,6 +488,7 @@ type DSN struct {
 	ParseTime            bool           // Parse time values to time.Time
 	MultiStatements      bool           // Allow multiple statements in one query
 	AllowNativePasswords bool           // Allow native password authentication
+	InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 }
 
 func NewDSN() *DSN {
@@ -495,6 +496,7 @@ func NewDSN() *DSN {
 		Timezone:             time.UTC,
 		ParseTime:            true,
 		AllowNativePasswords: true,
+		InterpolateParams:    true,
 	}
 }
 
@@ -554,6 +556,10 @@ func (self *DSN) Format() string {
 		writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 	}
 
+	if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+		writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+	}
+
 	if self.MultiStatements {
 		writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 	}
@@ -563,6 +569,14 @@ func (self *DSN) Format() string {
 	}
 
 	return buf.String()
+}
+
+var unsafeInterpolationCharsets = map[string]bool{
+	"big5":   true,
+	"cp932":  true,
+	"gb2312": true,
+	"gbk":    true,
+	"sjis":   true,
 }
 
 func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
@@ -913,7 +927,7 @@ func FindPostsByUserID(value uint64) []*Post {
 
 // FindPostByUserID finds an instance of Post by UserID.
 func FindPostByUserID(value uint64) (*Post, bool) {
-	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `user_id` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `user_id` = ? limit 1", value)
 	item := new(Post)
 	err := row.Scan(
 		&item.ID,
@@ -988,7 +1002,7 @@ func FindPostsByTitle(value string) []*Post {
 
 // FindPostByTitle finds an instance of Post by Title.
 func FindPostByTitle(value string) (*Post, bool) {
-	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `title` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `title` = ? limit 1", value)
 	item := new(Post)
 	err := row.Scan(
 		&item.ID,
@@ -1063,7 +1077,7 @@ func FindPostsByBody(value string) []*Post {
 
 // FindPostByBody finds an instance of Post by Body.
 func FindPostByBody(value string) (*Post, bool) {
-	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `body` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `body` = ? limit 1", value)
 	item := new(Post)
 	err := row.Scan(
 		&item.ID,
@@ -1138,7 +1152,7 @@ func FindPostsByPublished(value bool) []*Post {
 
 // FindPostByPublished finds an instance of Post by Published.
 func FindPostByPublished(value bool) (*Post, bool) {
-	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `published` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `user_id`, `title`, `body`, `published` from `posts` where `published` = ? limit 1", value)
 	item := new(Post)
 	err := row.Scan(
 		&item.ID,
@@ -1538,7 +1552,7 @@ func FindUsersByNameUnscoped(value string) []*User {
 
 // FindUserByName finds an instance of User by Name.
 func FindUserByName(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `name` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `name` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1566,7 +1580,7 @@ func FindUserByName(value string) (*User, bool) {
 
 // FindUserByNameUnscoped finds an instance (including deleted) of User by Name.
 func FindUserByNameUnscoped(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `name` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `name` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1704,7 +1718,7 @@ func FindUsersByEmailUnscoped(value sql.Null[string]) []*User {
 
 // FindUserByEmail finds an instance of User by Email.
 func FindUserByEmail(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1732,7 +1746,7 @@ func FindUserByEmail(value string) (*User, bool) {
 
 // FindUserByEmailUnscoped finds an instance (including deleted) of User by Email.
 func FindUserByEmailUnscoped(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `email` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1886,7 +1900,7 @@ func FindUsersByAgeUnscoped(value sql.Null[int64]) []*User {
 
 // FindUserByAge finds an instance of User by Age.
 func FindUserByAge(value int64) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `age` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `age` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -1914,7 +1928,7 @@ func FindUserByAge(value int64) (*User, bool) {
 
 // FindUserByAgeUnscoped finds an instance (including deleted) of User by Age.
 func FindUserByAgeUnscoped(value int64) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `age` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `age` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2060,7 +2074,7 @@ func FindUsersByActiveUnscoped(value bool) []*User {
 
 // FindUserByActive finds an instance of User by Active.
 func FindUserByActive(value bool) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2088,7 +2102,7 @@ func FindUserByActive(value bool) (*User, bool) {
 
 // FindUserByActiveUnscoped finds an instance (including deleted) of User by Active.
 func FindUserByActiveUnscoped(value bool) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `active` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2218,7 +2232,7 @@ func FindUsersByBalanceUnscoped(value string) []*User {
 
 // FindUserByBalance finds an instance of User by Balance.
 func FindUserByBalance(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `balance` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `balance` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2246,7 +2260,7 @@ func FindUserByBalance(value string) (*User, bool) {
 
 // FindUserByBalanceUnscoped finds an instance (including deleted) of User by Balance.
 func FindUserByBalanceUnscoped(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `balance` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `balance` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2384,7 +2398,7 @@ func FindUsersByScoreUnscoped(value sql.Null[float64]) []*User {
 
 // FindUserByScore finds an instance of User by Score.
 func FindUserByScore(value float64) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2412,7 +2426,7 @@ func FindUserByScore(value float64) (*User, bool) {
 
 // FindUserByScoreUnscoped finds an instance (including deleted) of User by Score.
 func FindUserByScoreUnscoped(value float64) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `score` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2566,7 +2580,7 @@ func FindUsersByNotesUnscoped(value sql.Null[string]) []*User {
 
 // FindUserByNotes finds an instance of User by Notes.
 func FindUserByNotes(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `notes` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `notes` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2594,7 +2608,7 @@ func FindUserByNotes(value string) (*User, bool) {
 
 // FindUserByNotesUnscoped finds an instance (including deleted) of User by Notes.
 func FindUserByNotesUnscoped(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `notes` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `notes` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2748,7 +2762,7 @@ func FindUsersByAvatarUnscoped(value sql.Null[string]) []*User {
 
 // FindUserByAvatar finds an instance of User by Avatar.
 func FindUserByAvatar(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `avatar` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `avatar` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2776,7 +2790,7 @@ func FindUserByAvatar(value string) (*User, bool) {
 
 // FindUserByAvatarUnscoped finds an instance (including deleted) of User by Avatar.
 func FindUserByAvatarUnscoped(value string) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `avatar` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `avatar` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2930,7 +2944,7 @@ func FindUsersByLastLoginUnscoped(value sql.Null[time.Time]) []*User {
 
 // FindUserByLastLogin finds an instance of User by LastLogin.
 func FindUserByLastLogin(value time.Time) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,
@@ -2958,7 +2972,7 @@ func FindUserByLastLogin(value time.Time) (*User, bool) {
 
 // FindUserByLastLoginUnscoped finds an instance (including deleted) of User by LastLogin.
 func FindUserByLastLoginUnscoped(value time.Time) (*User, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `name`, `email`, `age`, `active`, `balance`, `score`, `notes`, `avatar`, `last_login` from `users` where `last_login` = ? limit 1", value)
 	item := new(User)
 	err := row.Scan(
 		&item.ID,

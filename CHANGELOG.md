@@ -5,6 +5,7 @@
 ### Changes
 
 - Add `DSN.InterpolateParams`, enabled by default for MySQL
+- Add `limit 1` to single-row `Find<Model>By<Field>` finders
 
 ## [1.13.1] - 2026-10-06
 

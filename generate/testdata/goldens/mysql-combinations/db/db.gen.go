@@ -488,6 +488,7 @@ type DSN struct {
 	ParseTime            bool           // Parse time values to time.Time
 	MultiStatements      bool           // Allow multiple statements in one query
 	AllowNativePasswords bool           // Allow native password authentication
+	InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 }
 
 func NewDSN() *DSN {
@@ -495,6 +496,7 @@ func NewDSN() *DSN {
 		Timezone:             time.UTC,
 		ParseTime:            true,
 		AllowNativePasswords: true,
+		InterpolateParams:    true,
 	}
 }
 
@@ -554,6 +556,10 @@ func (self *DSN) Format() string {
 		writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 	}
 
+	if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+		writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+	}
+
 	if self.MultiStatements {
 		writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 	}
@@ -563,6 +569,14 @@ func (self *DSN) Format() string {
 	}
 
 	return buf.String()
+}
+
+var unsafeInterpolationCharsets = map[string]bool{
+	"big5":   true,
+	"cp932":  true,
+	"gb2312": true,
+	"gbk":    true,
+	"sjis":   true,
 }
 
 func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
@@ -904,7 +918,7 @@ func FindAuditEntriesByOccurredOn(value time.Time) []*AuditEntry {
 
 // FindAuditEntryByOccurredOn finds an instance of AuditEntry by OccurredOn.
 func FindAuditEntryByOccurredOn(value time.Time) (*AuditEntry, bool) {
-	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `occurred_on` = ?", value)
+	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `occurred_on` = ? limit 1", value)
 	item := new(AuditEntry)
 	err := row.Scan(
 		&item.ID,
@@ -981,7 +995,7 @@ func FindAuditEntriesByDuration(value sql.Null[time.Time]) []*AuditEntry {
 
 // FindAuditEntryByDuration finds an instance of AuditEntry by Duration.
 func FindAuditEntryByDuration(value time.Time) (*AuditEntry, bool) {
-	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `duration` = ?", value)
+	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `duration` = ? limit 1", value)
 	item := new(AuditEntry)
 	err := row.Scan(
 		&item.ID,
@@ -1070,7 +1084,7 @@ func FindAuditEntriesByYearValue(value int64) []*AuditEntry {
 
 // FindAuditEntryByYearValue finds an instance of AuditEntry by YearValue.
 func FindAuditEntryByYearValue(value int64) (*AuditEntry, bool) {
-	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `year_value` = ?", value)
+	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `year_value` = ? limit 1", value)
 	item := new(AuditEntry)
 	err := row.Scan(
 		&item.ID,
@@ -1143,7 +1157,7 @@ func FindAuditEntriesByDescription(value string) []*AuditEntry {
 
 // FindAuditEntryByDescription finds an instance of AuditEntry by Description.
 func FindAuditEntryByDescription(value string) (*AuditEntry, bool) {
-	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `description` = ?", value)
+	row := QueryRow("select `id`, `occurred_on`, `duration`, `year_value`, `description` from `audit_entries` where `description` = ? limit 1", value)
 	item := new(AuditEntry)
 	err := row.Scan(
 		&item.ID,
@@ -1298,7 +1312,7 @@ func FindMetadataListByCode(value string) []*Metadata {
 
 // FindMetadataByCode finds an instance of Metadata by Code.
 func FindMetadataByCode(value string) (*Metadata, bool) {
-	row := QueryRow("select `code`, `value` from `metadata` where `code` = ?", value)
+	row := QueryRow("select `code`, `value` from `metadata` where `code` = ? limit 1", value)
 	item := new(Metadata)
 	err := row.Scan(
 		&item.Code,
@@ -1353,7 +1367,7 @@ func FindMetadataListByValue(value sql.Null[string]) []*Metadata {
 
 // FindMetadataByValue finds an instance of Metadata by Value.
 func FindMetadataByValue(value string) (*Metadata, bool) {
-	row := QueryRow("select `code`, `value` from `metadata` where `value` = ?", value)
+	row := QueryRow("select `code`, `value` from `metadata` where `value` = ? limit 1", value)
 	item := new(Metadata)
 	err := row.Scan(
 		&item.Code,
@@ -1701,7 +1715,7 @@ func FindResourcesByAPIURLUnscoped(value string) []*Resource {
 
 // FindResourceByAPIURL finds an instance of Resource by APIURL.
 func FindResourceByAPIURL(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `api_url` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `api_url` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -1726,7 +1740,7 @@ func FindResourceByAPIURL(value string) (*Resource, bool) {
 
 // FindResourceByAPIURLUnscoped finds an instance (including deleted) of Resource by APIURL.
 func FindResourceByAPIURLUnscoped(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `api_url` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `api_url` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -1847,7 +1861,7 @@ func FindResourcesByPayloadUnscoped(value []byte) []*Resource {
 
 // FindResourceByPayload finds an instance of Resource by Payload.
 func FindResourceByPayload(value []byte) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -1872,7 +1886,7 @@ func FindResourceByPayload(value []byte) (*Resource, bool) {
 
 // FindResourceByPayloadUnscoped finds an instance (including deleted) of Resource by Payload.
 func FindResourceByPayloadUnscoped(value []byte) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `payload` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2001,7 +2015,7 @@ func FindResourcesByOptionalPayloadUnscoped(value sql.Null[string]) []*Resource 
 
 // FindResourceByOptionalPayload finds an instance of Resource by OptionalPayload.
 func FindResourceByOptionalPayload(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2026,7 +2040,7 @@ func FindResourceByOptionalPayload(value string) (*Resource, bool) {
 
 // FindResourceByOptionalPayloadUnscoped finds an instance (including deleted) of Resource by OptionalPayload.
 func FindResourceByOptionalPayloadUnscoped(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `optional_payload` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2163,7 +2177,7 @@ func FindResourcesByRatioUnscoped(value float64) []*Resource {
 
 // FindResourceByRatio finds an instance of Resource by Ratio.
 func FindResourceByRatio(value float64) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `ratio` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `ratio` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2188,7 +2202,7 @@ func FindResourceByRatio(value float64) (*Resource, bool) {
 
 // FindResourceByRatioUnscoped finds an instance (including deleted) of Resource by Ratio.
 func FindResourceByRatioUnscoped(value float64) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `ratio` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `ratio` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2309,7 +2323,7 @@ func FindResourcesByEnabledUnscoped(value bool) []*Resource {
 
 // FindResourceByEnabled finds an instance of Resource by Enabled.
 func FindResourceByEnabled(value bool) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `enabled` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `enabled` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2334,7 +2348,7 @@ func FindResourceByEnabled(value bool) (*Resource, bool) {
 
 // FindResourceByEnabledUnscoped finds an instance (including deleted) of Resource by Enabled.
 func FindResourceByEnabledUnscoped(value bool) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `enabled` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `enabled` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2455,7 +2469,7 @@ func FindResourcesByCategoryUnscoped(value string) []*Resource {
 
 // FindResourceByCategory finds an instance of Resource by Category.
 func FindResourceByCategory(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,
@@ -2480,7 +2494,7 @@ func FindResourceByCategory(value string) (*Resource, bool) {
 
 // FindResourceByCategoryUnscoped finds an instance (including deleted) of Resource by Category.
 func FindResourceByCategoryUnscoped(value string) (*Resource, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `api_url`, `payload`, `optional_payload`, `ratio`, `enabled`, `category` from `resources` where `category` = ? limit 1", value)
 	item := new(Resource)
 	err := row.Scan(
 		&item.ID,

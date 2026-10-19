@@ -473,6 +473,7 @@ type DSN struct {
 	ParseTime            bool           // Parse time values to time.Time
 	MultiStatements      bool           // Allow multiple statements in one query
 	AllowNativePasswords bool           // Allow native password authentication
+	InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 }
 
 func NewDSN() *DSN {
@@ -539,6 +540,10 @@ func (self *DSN) Format() string {
 		writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 	}
 
+	if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+		writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+	}
+
 	if self.MultiStatements {
 		writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 	}
@@ -548,6 +553,14 @@ func (self *DSN) Format() string {
 	}
 
 	return buf.String()
+}
+
+var unsafeInterpolationCharsets = map[string]bool{
+	"big5":   true,
+	"cp932":  true,
+	"gb2312": true,
+	"gbk":    true,
+	"sjis":   true,
 }
 
 func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
@@ -819,7 +832,7 @@ func FindCountersByName(value string) []*Counter {
 
 // FindCounterByName finds an instance of Counter by Name.
 func FindCounterByName(value string) (*Counter, bool) {
-	row := QueryRow("select `name`, `value` from `counters` where `name` = ?", value)
+	row := QueryRow("select `name`, `value` from `counters` where `name` = ? limit 1", value)
 	item := new(Counter)
 	err := row.Scan(
 		&item.Name,
@@ -870,7 +883,7 @@ func FindCountersByValue(value int64) []*Counter {
 
 // FindCounterByValue finds an instance of Counter by Value.
 func FindCounterByValue(value int64) (*Counter, bool) {
-	row := QueryRow("select `name`, `value` from `counters` where `value` = ?", value)
+	row := QueryRow("select `name`, `value` from `counters` where `value` = ? limit 1", value)
 	item := new(Counter)
 	err := row.Scan(
 		&item.Name,
@@ -1202,7 +1215,7 @@ func FindDocumentsByBodyUnscoped(value string) []*Document {
 
 // FindDocumentByBody finds an instance of Document by Body.
 func FindDocumentByBody(value string) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `body` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `body` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1225,7 +1238,7 @@ func FindDocumentByBody(value string) (*Document, bool) {
 
 // FindDocumentByBodyUnscoped finds an instance (including deleted) of Document by Body.
 func FindDocumentByBodyUnscoped(value string) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `body` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `body` = ? limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1348,7 +1361,7 @@ func FindDocumentsByPayloadUnscoped(value sql.Null[string]) []*Document {
 
 // FindDocumentByPayload finds an instance of Document by Payload.
 func FindDocumentByPayload(value string) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1371,7 +1384,7 @@ func FindDocumentByPayload(value string) (*Document, bool) {
 
 // FindDocumentByPayloadUnscoped finds an instance (including deleted) of Document by Payload.
 func FindDocumentByPayloadUnscoped(value string) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `payload` = ? limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1502,7 +1515,7 @@ func FindDocumentsByRankUnscoped(value float64) []*Document {
 
 // FindDocumentByRank finds an instance of Document by Rank.
 func FindDocumentByRank(value float64) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `rank` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `rank` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1525,7 +1538,7 @@ func FindDocumentByRank(value float64) (*Document, bool) {
 
 // FindDocumentByRankUnscoped finds an instance (including deleted) of Document by Rank.
 func FindDocumentByRankUnscoped(value float64) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `rank` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `rank` = ? limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1640,7 +1653,7 @@ func FindDocumentsByActiveUnscoped(value bool) []*Document {
 
 // FindDocumentByActive finds an instance of Document by Active.
 func FindDocumentByActive(value bool) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ? AND deleted_at IS NULL", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ? AND deleted_at IS NULL limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,
@@ -1663,7 +1676,7 @@ func FindDocumentByActive(value bool) (*Document, bool) {
 
 // FindDocumentByActiveUnscoped finds an instance (including deleted) of Document by Active.
 func FindDocumentByActiveUnscoped(value bool) (*Document, bool) {
-	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ?", value)
+	row := QueryRow("select `id`, `created_at`, `deleted_at`, `body`, `payload`, `rank`, `active` from `documents` where `active` = ? limit 1", value)
 	item := new(Document)
 	err := row.Scan(
 		&item.ID,

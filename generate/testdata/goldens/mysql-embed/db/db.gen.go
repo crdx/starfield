@@ -488,6 +488,7 @@ type DSN struct {
 	ParseTime            bool           // Parse time values to time.Time
 	MultiStatements      bool           // Allow multiple statements in one query
 	AllowNativePasswords bool           // Allow native password authentication
+	InterpolateParams    bool           // Interpolate parameters client-side instead of preparing a server-side statement per query
 }
 
 func NewDSN() *DSN {
@@ -495,6 +496,7 @@ func NewDSN() *DSN {
 		Timezone:             time.UTC,
 		ParseTime:            true,
 		AllowNativePasswords: true,
+		InterpolateParams:    true,
 	}
 }
 
@@ -554,6 +556,10 @@ func (self *DSN) Format() string {
 		writeDSNParam(&buf, &hasParam, "charset", self.Charset)
 	}
 
+	if self.InterpolateParams && !unsafeInterpolationCharsets[strings.ToLower(self.Charset)] {
+		writeDSNParam(&buf, &hasParam, "interpolateParams", "true")
+	}
+
 	if self.MultiStatements {
 		writeDSNParam(&buf, &hasParam, "multiStatements", "true")
 	}
@@ -563,6 +569,14 @@ func (self *DSN) Format() string {
 	}
 
 	return buf.String()
+}
+
+var unsafeInterpolationCharsets = map[string]bool{
+	"big5":   true,
+	"cp932":  true,
+	"gb2312": true,
+	"gbk":    true,
+	"sjis":   true,
 }
 
 func writeDSNParam(buf *bytes.Buffer, hasParam *bool, name, value string) {
@@ -892,7 +906,7 @@ func FindAuthorsByName(value string) []*Author {
 
 // FindAuthorByName finds an instance of Author by Name.
 func FindAuthorByName(value string) (*Author, bool) {
-	row := QueryRow("select `id`, `name`, `born_on` from `authors` where `name` = ?", value)
+	row := QueryRow("select `id`, `name`, `born_on` from `authors` where `name` = ? limit 1", value)
 	item := new(Author)
 	err := row.Scan(
 		&item.ID,
@@ -965,7 +979,7 @@ func FindAuthorsByBornOn(value sql.Null[time.Time]) []*Author {
 
 // FindAuthorByBornOn finds an instance of Author by BornOn.
 func FindAuthorByBornOn(value time.Time) (*Author, bool) {
-	row := QueryRow("select `id`, `name`, `born_on` from `authors` where `born_on` = ?", value)
+	row := QueryRow("select `id`, `name`, `born_on` from `authors` where `born_on` = ? limit 1", value)
 	item := new(Author)
 	err := row.Scan(
 		&item.ID,
@@ -1201,7 +1215,7 @@ func FindBooksByAuthorID(value uint64) []*Book {
 
 // FindBookByAuthorID finds an instance of Book by AuthorID.
 func FindBookByAuthorID(value uint64) (*Book, bool) {
-	row := QueryRow("select `id`, `author_id`, `title`, `created_at` from `books` where `author_id` = ?", value)
+	row := QueryRow("select `id`, `author_id`, `title`, `created_at` from `books` where `author_id` = ? limit 1", value)
 	item := new(Book)
 	err := row.Scan(
 		&item.ID,
@@ -1272,7 +1286,7 @@ func FindBooksByTitle(value string) []*Book {
 
 // FindBookByTitle finds an instance of Book by Title.
 func FindBookByTitle(value string) (*Book, bool) {
-	row := QueryRow("select `id`, `author_id`, `title`, `created_at` from `books` where `title` = ?", value)
+	row := QueryRow("select `id`, `author_id`, `title`, `created_at` from `books` where `title` = ? limit 1", value)
 	item := new(Book)
 	err := row.Scan(
 		&item.ID,
@@ -1484,7 +1498,7 @@ func FindBookReviewsByBookID(value uint64) []*BookReview {
 
 // FindBookReviewByBookID finds an instance of BookReview by BookID.
 func FindBookReviewByBookID(value uint64) (*BookReview, bool) {
-	row := QueryRow("select `id`, `book_id`, `rating` from `book_reviews` where `book_id` = ?", value)
+	row := QueryRow("select `id`, `book_id`, `rating` from `book_reviews` where `book_id` = ? limit 1", value)
 	item := new(BookReview)
 	err := row.Scan(
 		&item.ID,
@@ -1553,7 +1567,7 @@ func FindBookReviewsByRating(value uint64) []*BookReview {
 
 // FindBookReviewByRating finds an instance of BookReview by Rating.
 func FindBookReviewByRating(value uint64) (*BookReview, bool) {
-	row := QueryRow("select `id`, `book_id`, `rating` from `book_reviews` where `rating` = ?", value)
+	row := QueryRow("select `id`, `book_id`, `rating` from `book_reviews` where `rating` = ? limit 1", value)
 	item := new(BookReview)
 	err := row.Scan(
 		&item.ID,
