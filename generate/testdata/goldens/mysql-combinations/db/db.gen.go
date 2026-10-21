@@ -1,7 +1,7 @@
 // Code generated with:
 //
 //	sqlc     	v1.31.1
-//	starfield	v1.13.1
+//	starfield	v1.14.0
 //
 //nolint:all
 package db
