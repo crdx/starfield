@@ -16,13 +16,13 @@ fmt:
     go fmt ./...
 
 lint:
-    unbuffer go vet ./... | gostack
-    unbuffer golangci-lint run --color never | gostack
+    go vet ./...
+    golangci-lint run --color never
 
 fix:
-    unbuffer golangci-lint run --color never --fix | gostack
+    golangci-lint run --color never --fix
 
 check: test fmt lint
 
 test:
-    unbuffer go test -cover ./... | gostack --test
+    go test -cover ./...
